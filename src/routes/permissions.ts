@@ -9,6 +9,7 @@ const paths: Record<string, string> = {
   "/contractor-create": "CONTRACTOR_CREATE",
   "/create": "CREATE_RECEIVE",
   "/import": "IMPORT_RECEIVE",
+  "/pickup": "RECEIVE_REPORT",
   "/receive-report": "RECEIVE_REPORT",
   "/receive-report-print/:receiveBusinessId": "RECEIVE_REPORT",
   "/label-print": "LABEL_PRINT",

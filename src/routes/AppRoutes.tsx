@@ -43,6 +43,7 @@ const ProductWarehouseSerial = lazy(() => import("../pages/Warehouse/ProductWare
 const ProgramIssueReport = lazy(() => import("../pages/Support/ProgramIssueReport"));
 const ProgramVersions = lazy(() => import("../pages/Support/ProgramVersions"));
 const ReceiveImport = lazy(() => import("../pages/Receive/ReceiveImport"));
+const ReceivePickup = lazy(() => import("../pages/Receive/ReceivePickup"));
 const ReceiveReport = lazy(() => import("../pages/Receive/ReceiveReport"));
 const ReceiveReportPrint = lazy(() => import("../pages/Receive/ReceiveReportPrint"));
 const RouteMap = lazy(() => import("../pages/Maps/RouteMap"));
@@ -99,6 +100,7 @@ export default function AppRoutes() {
           <Route path="/program-issues" element={<ProgramIssueReport />} />
           <Route path="/program-versions" element={<ProgramVersions />} />
           <Route path="/import" element={<ReceiveImport />} />
+          <Route path="/pickup" element={<ReceivePickup />} />
           <Route path="/receive-report" element={<ReceiveReport />} />
           <Route path="/receive-report-print/:receiveBusinessId" element={<ReceiveReportPrint />} />
           <Route path="/map" element={<RouteMap />} />

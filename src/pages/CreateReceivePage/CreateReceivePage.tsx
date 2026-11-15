@@ -549,7 +549,8 @@ export default function CreateReceivePage() {
 
   const validateReceive = () => {
     if (!form.customer_id) return "กรุณาเลือกเจ้าของงาน";
-    if (!form.assigned_warehouse_id) return "กรุณาเลือกคลังดูแลงาน";
+    const isPickupRequested = form.is_pickup_customer === "Y" || form.is_pickup_shipper === "Y";
+    if (!isPickupRequested && !form.assigned_warehouse_id) return "กรุณาเลือกคลังดูแลงาน";
     if (!form.shipper_id) return "กรุณาเลือกผู้ส่ง";
     if (!form.recipient_id || !form.recipient_detail_id) return "กรุณาเลือกผู้รับ";
     if (!form.address) return "กรุณาระบุที่อยู่ผู้รับ";
@@ -630,6 +631,8 @@ export default function CreateReceivePage() {
 
           is_document_return: form.is_document_return,
           document_return_id: form.is_document_return === "Y" && form.document_return ? Number(form.document_return) : null,
+          is_pickup_customer: form.is_pickup_customer,
+          is_pickup_shipper: form.is_pickup_shipper,
 
           remark: form.remark || null,
 

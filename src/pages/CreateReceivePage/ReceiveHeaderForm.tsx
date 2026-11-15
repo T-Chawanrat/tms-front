@@ -4,7 +4,7 @@ import DatePicker from "../../components/tms/form/DatePicker";
 import RequiredLabel from "../../components/tms/form/RequiredLabel";
 import SearchableSelect from "../../components/tms/form/SearchableSelect";
 import Select from "../../components/tms/form/Select";
-import { 
+import {
   buttonInputClass,
   checkboxInputClass,
   datePickerWrapClass,
@@ -31,8 +31,6 @@ type ReceiveHeaderFormProps = {
   onOpenShipperModal: () => void;
   onOpenRecipientModal: () => void;
 
-  // ใช้กับ DatePicker วันที่ส่ง
-  // optional ไว้ก่อน เพื่อไม่ให้ parent อื่นที่ยังไม่ได้ส่ง props นี้พัง
   recipientServiceDayIds?: number[];
   recipientTransitDays?: number | null;
   holidayDates?: string[];
@@ -64,15 +62,18 @@ export default function ReceiveHeaderForm({
   const deliveryMinDate =
     recipientTransitDays === null || recipientTransitDays === undefined
       ? undefined
-      : dayjs().add(Number(recipientTransitDays || 0), "day").format("YYYY-MM-DD");
+      : dayjs()
+          .add(Number(recipientTransitDays || 0), "day")
+          .format("YYYY-MM-DD");
 
   const normalizedRecipientServiceDayIds = recipientServiceDayIds.map(Number).filter((value) => Number.isFinite(value));
+  const isPickupRequested = form.is_pickup_customer === "Y" || form.is_pickup_shipper === "Y";
 
   return (
     <div className="space-y-2">
       {/* แถวบน */}
       <div className="rounded-md border border-slate-200 bg-white p-2">
-        <div className="grid grid-cols-1 gap-2 xl:grid-cols-[120px_minmax(250px,1.2fr)_240px_minmax(130px,0.65fr)_204px]">
+        <div className="grid grid-cols-1 gap-2 xl:grid-cols-[88px_minmax(220px,1.05fr)_130px_170px_minmax(130px,0.6fr)_150px]">
           <div>
             <label className={`mb-1 block ${labelClass}`}>เลขที่บิล</label>
             <input className={`${disabledInputClass} !rounded-md`} value={form.receive_code} disabled placeholder="Auto" />
@@ -94,14 +95,35 @@ export default function ReceiveHeaderForm({
           </div>
 
           <div>
-            <RequiredLabel required className={`mb-1 block ${labelClass}`}>
+            <label className={`mb-1 block ${labelClass}`}>รถเข้ารับพัสดุ</label>
+            <Select
+              className="!h-9 !rounded-md !text-[13px]"
+              value={form.is_pickup_customer === "Y" ? "CUSTOMER" : form.is_pickup_shipper === "Y" ? "SHIPPER" : ""}
+              onChange={(value) =>
+                setForm((prev) => ({
+                  ...prev,
+                  is_pickup_customer: value === "CUSTOMER" ? "Y" : "N",
+                  is_pickup_shipper: value === "SHIPPER" ? "Y" : "N",
+                }))
+              }
+              options={[
+                { value: "", label: "ไม่เรียกรถ" },
+                { value: "CUSTOMER", label: "เจ้าของงาน" },
+                { value: "SHIPPER", label: "ผู้ส่ง" },
+              ]}
+            />
+          </div>
+
+          <div>
+            <RequiredLabel required={!isPickupRequested} className={`mb-1 block ${labelClass}`}>
               คลังต้นทาง
             </RequiredLabel>
             <SearchableSelect
-              value={form.assigned_warehouse_id}
+              value={isPickupRequested ? "" : form.assigned_warehouse_id}
               options={warehouses.map((warehouse) => ({ value: String(warehouse.id), label: warehouse.name }))}
               onChange={(value) => updateForm("assigned_warehouse_id", value)}
-              placeholder="เลือกคลังต้นทาง"
+              placeholder={isPickupRequested ? "เลือกคลังอัตโนมัติ" : "เลือกคลังต้นทาง"}
+              disabled={isPickupRequested}
               compact
             />
           </div>
@@ -118,7 +140,9 @@ export default function ReceiveHeaderForm({
 
           <div>
             <label className={`mb-1 block ${labelClass}`}>วันที่ส่ง</label>
-            <div className={`${datePickerWrapClass} [&_.MuiFormControl-root]:!border-0 [&_.MuiFormControl-root]:!shadow-none [&_.MuiOutlinedInput-root]:!border-0 [&_.MuiOutlinedInput-notchedOutline]:!border [&_.MuiOutlinedInput-notchedOutline]:!border-slate-200`}>
+            <div
+              className={`${datePickerWrapClass} [&_.MuiFormControl-root]:!border-0 [&_.MuiFormControl-root]:!shadow-none [&_.MuiOutlinedInput-root]:!border-0 [&_.MuiOutlinedInput-notchedOutline]:!border [&_.MuiOutlinedInput-notchedOutline]:!border-slate-200`}
+            >
               <DatePicker
                 variant="compact"
                 value={form.delivery_date}
@@ -131,11 +155,8 @@ export default function ReceiveHeaderForm({
 
                   const dateKey = day.format("YYYY-MM-DD");
 
-                  // วันหยุดจาก mm_holidays เลือกไม่ได้
                   if (holidayDates.includes(dateKey)) return true;
 
-                  // ถ้ายังไม่มีข้อมูล calendar อย่า block ทุกวัน
-                  // เพราะบางจังหวะ API อาจยังโหลดไม่ทัน
                   if (normalizedRecipientServiceDayIds.length === 0) return false;
 
                   const dayId = day.day();
@@ -317,7 +338,12 @@ export default function ReceiveHeaderForm({
           <div className="grid grid-cols-[88px_250px] items-center gap-1.5">
             <label className={labelClass}>ประเภทการจ่าย</label>
 
-            <Select className="!h-9 !rounded-md !text-[13px]" value={String(form.payment_type_id)} onChange={(value) => updateForm("payment_type_id", value)} options={payments.map((item) => ({ value: String(item.id), label: item.name }))} />
+            <Select
+              className="!h-9 !rounded-md !text-[13px]"
+              value={String(form.payment_type_id)}
+              onChange={(value) => updateForm("payment_type_id", value)}
+              options={payments.map((item) => ({ value: String(item.id), label: item.name }))}
+            />
           </div>
 
           <div className="grid grid-cols-[96px_minmax(0,1fr)] items-center gap-1.5">
@@ -389,7 +415,16 @@ export default function ReceiveHeaderForm({
                 disabled={form.is_document_return !== "Y" || loadingROCodes || !form.shipper_id}
                 onChange={(value) => updateForm("document_return", value)}
                 options={[
-                  { value: "", label: loadingROCodes ? "กำลังโหลด..." : !form.shipper_id ? "เลือกผู้ส่งก่อน" : roCodes.length === 0 ? "ไม่มีเอกสารรับกลับ" : "เลือกเอกสารรับกลับ" },
+                  {
+                    value: "",
+                    label: loadingROCodes
+                      ? "กำลังโหลด..."
+                      : !form.shipper_id
+                        ? "เลือกผู้ส่งก่อน"
+                        : roCodes.length === 0
+                          ? "ไม่มีเอกสารรับกลับ"
+                          : "เลือกเอกสารรับกลับ",
+                  },
                   ...roCodes.map((item) => ({ value: String(item.ro_code_id), label: `${item.ro_code} - ${item.ro_name}` })),
                 ]}
               />

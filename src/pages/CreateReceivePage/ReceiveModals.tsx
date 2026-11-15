@@ -6,10 +6,17 @@ import { X } from "lucide-react";
 import AxiosInstance from "../../services/apiClient";
 import Select from "../../components/tms/form/Select";
 import { calculatePackageRate, isWeightFix, moneyValue, toNum } from "../../utils/packageRate";
-import {
-  inputClass,
-} from "./createReceiveConfig";
-import type { CustomerOption, GroupedPackageOption, GroupedRecipient, PackageOption, PackageRow, RecipientOption, ShipperOption, UpdatePackageForm } from "../../types/receive";
+import { inputClass } from "./createReceiveConfig";
+import type {
+  CustomerOption,
+  GroupedPackageOption,
+  GroupedRecipient,
+  PackageOption,
+  PackageRow,
+  RecipientOption,
+  ShipperOption,
+  UpdatePackageForm,
+} from "../../types/receive";
 
 type ReceiveModalsProps = {
   customerId: string;
@@ -204,10 +211,10 @@ export default function ReceiveModals({
 
   const packageBaseReady = Boolean(
     packageForm.package_id &&
-      packageForm.package_name.trim() &&
-      packageForm.package_detail_id &&
-      packageForm.package_size_name.trim() &&
-      toNum(packageForm.unit_price) > 0,
+    packageForm.package_name.trim() &&
+    packageForm.package_detail_id &&
+    packageForm.package_size_name.trim() &&
+    toNum(packageForm.unit_price) > 0,
   );
 
   const packageDimensionReady =
@@ -448,7 +455,10 @@ export default function ReceiveModals({
     }
 
     const isDuplicateSN = packageRows.some(
-      (row) => String(row.barcode || "").trim().toLowerCase() === cleanBarcode.toLowerCase(),
+      (row) =>
+        String(row.barcode || "")
+          .trim()
+          .toLowerCase() === cleanBarcode.toLowerCase(),
     );
 
     if (isDuplicateSN) {
@@ -551,7 +561,9 @@ export default function ReceiveModals({
                           className={`cursor-pointer ${selected ? "bg-blue-50" : "hover:bg-slate-100"}`}
                         >
                           <td className="border-b border-slate-200 px-2 py-2">
-                            <div className="font-medium text-slate-700">{item.code} - {item.name}</div>
+                            <div className="font-medium text-slate-700">
+                              {item.code} - {item.name}
+                            </div>
                           </td>
                           <td className="border-b border-slate-200 px-2 py-2 text-center text-sm font-semibold text-blue-600">
                             {selected ? "✓" : ""}
@@ -562,7 +574,9 @@ export default function ReceiveModals({
 
                     {!pagedCustomers.length && (
                       <tr>
-                        <td colSpan={2} className="py-6 text-center text-xs text-slate-400">ไม่พบข้อมูลเจ้าของงาน</td>
+                        <td colSpan={2} className="py-6 text-center text-xs text-slate-400">
+                          ไม่พบข้อมูลเจ้าของงาน
+                        </td>
                       </tr>
                     )}
                   </tbody>
@@ -584,7 +598,6 @@ export default function ReceiveModals({
                 sx={paginationSx}
               />
             </div>
-
           </div>
         </div>
       )}
@@ -632,24 +645,24 @@ export default function ReceiveModals({
                       const selected = String(shipperId) === String(item.shipper_id);
 
                       return (
-                      <tr
-                        key={item.shipper_id}
-                        onClick={() => selectShipper(item)}
-                        className={`cursor-pointer ${selected ? "bg-blue-50" : "hover:bg-slate-100"}`}
-                      >
-                        <td className="border-b border-slate-200 px-2 py-2">
-                          <div className="font-medium text-slate-700">
-                            {item.shipper_code} - {item.shipper_name}
-                          </div>
-                          <div className="mt-0.5 truncate text-[12px] text-slate-500" title={`${item.address || "-"} Tel.${item.tel || "-"}`}>
-                            {item.address || "-"} &nbsp;&nbsp;Tel.{item.tel || "-"}
-                          </div>
-                        </td>
+                        <tr
+                          key={item.shipper_id}
+                          onClick={() => selectShipper(item)}
+                          className={`cursor-pointer ${selected ? "bg-blue-50" : "hover:bg-slate-100"}`}
+                        >
+                          <td className="border-b border-slate-200 px-2 py-2">
+                            <div className="font-medium text-slate-700">
+                              {item.shipper_code} - {item.shipper_name}
+                            </div>
+                            <div className="mt-0.5 truncate text-[12px] text-slate-500" title={`${item.address || "-"} Tel.${item.tel || "-"}`}>
+                              {item.address || "-"} &nbsp;&nbsp;Tel.{item.tel || "-"}
+                            </div>
+                          </td>
 
-                        <td className="border-b border-slate-200 px-2 py-2 text-center text-sm font-semibold text-blue-600">
-                          {selected ? "✓" : ""}
-                        </td>
-                      </tr>
+                          <td className="border-b border-slate-200 px-2 py-2 text-center text-sm font-semibold text-blue-600">
+                            {selected ? "✓" : ""}
+                          </td>
+                        </tr>
                       );
                     })}
 
@@ -678,7 +691,6 @@ export default function ReceiveModals({
                 sx={paginationSx}
               />
             </div>
-
           </div>
         </div>
       )}
@@ -804,7 +816,6 @@ export default function ReceiveModals({
                                               .filter(Boolean)
                                               .join(" ") || "-"}
                                           </td>
-
                                         </tr>
                                       ))}
                                     </tbody>
@@ -842,7 +853,6 @@ export default function ReceiveModals({
                 sx={paginationSx}
               />
             </div>
-
           </div>
         </div>
       )}
@@ -1170,9 +1180,7 @@ export default function ReceiveModals({
                           </div>
                         </td>
 
-                        <td className="border-b border-slate-200 px-2 py-2 text-center text-sm font-semibold text-blue-600">
-                          {selected ? "✓" : ""}
-                        </td>
+                        <td className="border-b border-slate-200 px-2 py-2 text-center text-sm font-semibold text-blue-600">{selected ? "✓" : ""}</td>
                       </tr>
                     );
                   })}
@@ -1187,7 +1195,6 @@ export default function ReceiveModals({
                 </tbody>
               </table>
             </div>
-
           </div>
         </div>
       )}

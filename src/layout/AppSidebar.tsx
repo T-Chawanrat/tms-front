@@ -49,6 +49,7 @@ const navItems: NavItem[] = [
     subItems: [
       { name: "สร้างบิล", path: "/create", icon: <File size={20} /> },
       { name: "นำเข้าบิล", path: "/import", icon: <File size={20} /> },
+      { name: "รถเข้ารับพัสดุ", path: "/pickup", icon: <File size={20} /> },
       { name: "รายการบิล", path: "/receive-report", icon: <File size={20} /> },
       { name: "พิมพ์สติกเกอร์", path: "/label-print", icon: <File size={20} /> },
       { name: "ปิดงานจัดส่ง", path: "/delivery-close", icon: <File size={20} /> },
