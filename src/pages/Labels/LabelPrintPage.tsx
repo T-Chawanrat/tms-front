@@ -115,9 +115,9 @@ export default function LabelPrintPage() {
   const afterPrintHandledRef = useRef(false);
 
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(50);
+  const [limit, setLimit] = useState(100);
 
-  const [pagination, setPagination] = useState<Pagination>(defaultLabelPagination);
+  const [pagination, setPagination] = useState<Pagination>({ ...defaultLabelPagination, limit: 100 });
 
   const [receiveLoading, setReceiveLoading] = useState(false);
   const [serialLoading, setSerialLoading] = useState(false);
@@ -524,7 +524,7 @@ export default function LabelPrintPage() {
           <FilterInput
             value={filters.receive_code}
             onChange={(value) => updateFilter("receive_code", value)}
-            placeholder="Receive Code / Serial No"
+            placeholder="ค้นหา เลขที่บิล / SN"
             onEnter={handleSearch}
           />
 
@@ -532,7 +532,7 @@ export default function LabelPrintPage() {
             value={filters.customer_id}
             options={customers}
             onChange={(value) => updateFilter("customer_id", value)}
-            placeholder={filterLoading ? "กำลังโหลด Customer..." : "Customer ทั้งหมด"}
+            placeholder={filterLoading ? "กำลังโหลด เจ้าของงาน..." : "เจ้าของงานทั้งหมด"}
             showCode
           />
 

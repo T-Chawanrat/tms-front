@@ -604,7 +604,7 @@ export default function ManageUsers() {
         {/* FILTER */}
         <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-2 flex gap-3 flex-wrap shrink-0">
           <input
-            placeholder="ค้นหา username / ชื่อ / รหัสพนักงาน / เบอร์โทร"
+            placeholder="ค้นหา Username / ชื่อ / รหัสพนักงาน / เบอร์โทร"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="input-modern w-[320px]"

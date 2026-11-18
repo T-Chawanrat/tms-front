@@ -819,7 +819,7 @@ export default function ManageShippers() {
           <SearchableSelect value={customerId} onChange={setCustomerId} placeholder="เลือกผู้ส่ง" className="!w-full sm:!w-[32rem]" options={[{ value: "", label: "เลือกผู้ส่ง" }, ...customers.map((c) => ({ value: String(c.id), label: `${c.id} ${c.code} - ${c.name}` }))]} />
 
         <input
-          placeholder="ค้นหา code / ชื่อผู้ส่ง / เบอร์โทร"
+          placeholder="ค้นหา Code / ชื่อผู้ส่ง / เบอร์โทร"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="input-modern w-[260px]"

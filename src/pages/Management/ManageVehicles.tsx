@@ -561,7 +561,7 @@ export default function ManageVehicles() {
         {/* FILTER */}
         <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-2 flex gap-3 flex-wrap shrink-0">
           <input
-            placeholder="ค้นหา..."
+            placeholder="ค้นหาทะเบียน / ยี่ห้อ / รุ่น / สี"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="input-modern w-[220px]"

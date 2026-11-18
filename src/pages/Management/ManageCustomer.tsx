@@ -494,7 +494,7 @@ export default function ManageCustomers() {
       {/* FILTER CARD */}
       <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-2 flex gap-3 flex-wrap shrink-0">
         <input
-          placeholder="ค้นหา code / ชื่อ"
+          placeholder="ค้นหา Code / ชื่อ"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="input-modern w-[220px]"

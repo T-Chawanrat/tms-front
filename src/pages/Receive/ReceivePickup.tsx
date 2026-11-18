@@ -2,6 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { RefreshCw, X } from "lucide-react";
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 import DataGrid from "../../components/tms/table/DataGrid";
+import DatePicker from "../../components/tms/form/DatePicker";
+import SearchableSelect from "../../components/tms/form/SearchableSelect";
+import Select from "../../components/tms/form/Select";
 import AxiosInstance from "../../services/apiClient";
 import { formatThaiDateTime, toThaiDate } from "../../utils/dateTime";
 
@@ -11,6 +14,7 @@ type PickupReceiveRow = {
   source_type: "WEB" | "IMPORT";
   receive_id: number;
   receive_code?: string | null;
+  reference_no?: string | null;
   receive_date?: string | null;
   delivery_date?: string | null;
   customer_name?: string | null;
@@ -19,6 +23,12 @@ type PickupReceiveRow = {
   to_warehouse_name?: string | null;
   pickup_type?: PickupType | null;
   pickup_name?: string | null;
+  pickup_address?: string | null;
+  pickup_route_id?: number | null;
+  pickup_route_code?: string | null;
+  pickup_route_name?: string | null;
+  pickup_route_count?: number | string | null;
+  remark?: string | null;
   pickup_subdistrict_name?: string | null;
   pickup_district_name?: string | null;
   pickup_province_name?: string | null;
@@ -45,7 +55,10 @@ type Pagination = {
   totalPages: number;
 };
 
-const emptyPagination: Pagination = { page: 1, limit: 50, total: 0, totalPages: 1 };
+const emptyPagination: Pagination = { page: 1, limit: 100, total: 0, totalPages: 1 };
+const emptyFilters = { search: "", date_from: "", date_to: "", customer_id: "", pickup_type: "", warehouse_id: "" };
+type Customer = { id: number; code?: string; name: string };
+type Warehouse = { id?: number; warehouse_id?: number; name?: string; warehouse_name?: string };
 
 const text = (value: unknown) => (value === null || value === undefined || value === "" ? "-" : String(value));
 
@@ -61,33 +74,52 @@ export default function ReceivePickup() {
   const [rows, setRows] = useState<PickupReceiveRow[]>([]);
   const [pagination, setPagination] = useState<Pagination>(emptyPagination);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(50);
+  const [limit, setLimit] = useState(100);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [serialTarget, setSerialTarget] = useState<PickupReceiveRow | null>(null);
   const [serialRows, setSerialRows] = useState<PickupSerialRow[]>([]);
   const [serialLoading, setSerialLoading] = useState(false);
+  const [filters, setFilters] = useState(emptyFilters);
+  const [appliedFilters, setAppliedFilters] = useState(emptyFilters);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
+  const [totalSerial, setTotalSerial] = useState(0);
 
   const fetchPickupReceives = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
 
-      const response = await AxiosInstance.get<{ data?: PickupReceiveRow[]; pagination?: Pagination }>("/pickup", {
-        params: { page, limit },
-      });
+      const response = await AxiosInstance.get<{ data?: PickupReceiveRow[]; pagination?: Pagination; summary?: { total_serial: number } }>(
+        "/pickup",
+        {
+          params: { page, limit, ...appliedFilters },
+        },
+      );
 
       setRows(Array.isArray(response.data?.data) ? response.data.data : []);
       setPagination(response.data?.pagination || { ...emptyPagination, page, limit });
+      setTotalSerial(response.data?.summary?.total_serial ?? 0);
     } catch (requestError) {
       console.error("fetch pickup receives error:", requestError);
       setRows([]);
       setPagination({ ...emptyPagination, page, limit });
+      setTotalSerial(0);
       setError("ไม่สามารถโหลดรายการรถเข้ารับพัสดุได้");
     } finally {
       setLoading(false);
     }
-  }, [limit, page]);
+  }, [appliedFilters, limit, page]);
+
+  useEffect(() => {
+    void Promise.allSettled([AxiosInstance.get<Customer[]>("/customers"), AxiosInstance.get<Warehouse[]>("/warehouses")]).then(
+      ([customerResult, warehouseResult]) => {
+        if (customerResult.status === "fulfilled" && Array.isArray(customerResult.value.data)) setCustomers(customerResult.value.data);
+        if (warehouseResult.status === "fulfilled" && Array.isArray(warehouseResult.value.data)) setWarehouses(warehouseResult.value.data);
+      },
+    );
+  }, []);
 
   useEffect(() => {
     void fetchPickupReceives();
@@ -101,7 +133,9 @@ export default function ReceivePickup() {
     const fetchSerials = async () => {
       try {
         setSerialLoading(true);
-        const response = await AxiosInstance.get<{ data?: PickupSerialRow[] }>(`/pickup/${serialTarget.source_type}/${serialTarget.receive_id}/serials`);
+        const response = await AxiosInstance.get<{ data?: PickupSerialRow[] }>(
+          `/pickup/${serialTarget.source_type}/${serialTarget.receive_id}/serials`,
+        );
         if (active) setSerialRows(Array.isArray(response.data?.data) ? response.data.data : []);
       } catch (requestError) {
         console.error("fetch pickup receive serials error:", requestError);
@@ -150,6 +184,7 @@ export default function ReceivePickup() {
           </button>
         ),
       },
+      { field: "reference_no", headerName: "REFERENCE", width: 180, minWidth: 160, valueGetter: (value) => text(value) },
       {
         field: "receive_date",
         headerName: "วันที่สร้าง",
@@ -166,13 +201,33 @@ export default function ReceivePickup() {
       },
       { field: "pickup_type", headerName: "รับสินค้าจาก", width: 135, minWidth: 125, valueGetter: (value) => pickupTypeText(value) },
       { field: "pickup_name", headerName: "จุดรับสินค้า", width: 220, minWidth: 190, valueGetter: (value) => text(value) },
+      { field: "pickup_address", headerName: "ที่อยู่จุดรับ", width: 220, minWidth: 190, valueGetter: (value) => text(value) },
       { field: "shipper_tel", headerName: "เบอร์โทร", width: 130, minWidth: 120, valueGetter: (value) => text(value) },
       { field: "pickup_subdistrict_name", headerName: "ตำบล", width: 135, minWidth: 120, valueGetter: (value) => text(value) },
       { field: "pickup_district_name", headerName: "อำเภอ", width: 135, minWidth: 120, valueGetter: (value) => text(value) },
       { field: "pickup_province_name", headerName: "จังหวัด", width: 145, minWidth: 130, valueGetter: (value) => text(value) },
-      { field: "assigned_warehouse_name", headerName: "คลังรับเข้า", width: 180, minWidth: 160, valueGetter: (value) => text(value) },
+      {
+        field: "pickup_route_id",
+        headerName: "สายรถเข้ารับ",
+        width: 220,
+        minWidth: 180,
+        valueGetter: (_value, row) =>
+          Number(row.pickup_route_count) > 1
+            ? "หลายสาย"
+            : [row.pickup_route_code, row.pickup_route_name].filter(Boolean).join(" - ") || "-",
+      },
+      { field: "assigned_warehouse_name", headerName: "รับมาเข้าคลัง", width: 180, minWidth: 160, valueGetter: (value) => text(value) },
       { field: "to_warehouse_name", headerName: "คลังปลายทาง", width: 180, minWidth: 160, valueGetter: (value) => text(value) },
-      { field: "total_serial", headerName: "SN", width: 90, minWidth: 80, align: "right", headerAlign: "right", valueGetter: (value) => number(value) },
+      {
+        field: "total_serial",
+        headerName: "SN",
+        width: 90,
+        minWidth: 80,
+        align: "right",
+        headerAlign: "right",
+        valueGetter: (value) => number(value),
+      },
+      { field: "remark", headerName: "เงื่อนไขการเข้ารับ / จัดส่ง", width: 220, minWidth: 180, valueGetter: (value) => text(value) },
     ],
     [],
   );
@@ -209,20 +264,113 @@ export default function ReceivePickup() {
           <p className="mt-0.5 text-xs text-slate-500">บิลที่ระบุให้ไปรับสินค้าจากเจ้าของงานหรือผู้ส่ง</p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => void fetchPickupReceives()}
-          disabled={loading}
-          className="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
-          รีเฟรช
-        </button>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex h-8 items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-2.5 text-xs text-blue-700">
+            บิล <span className="font-semibold">{loading ? "..." : number(pagination.total)}</span>
+          </span>
+          <span className="inline-flex h-8 items-center gap-1 rounded-md border border-emerald-200 bg-emerald-50 px-2.5 text-xs text-emerald-700">
+            SN <span className="font-semibold text-emerald-800">{loading ? "..." : number(totalSerial)}</span>
+          </span>
+          <button
+            type="button"
+            onClick={() => void fetchPickupReceives()}
+            disabled={loading}
+            className="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
+            รีเฟรช
+          </button>
+        </div>
       </div>
+
+      <form
+        className="mb-3 shrink-0 rounded-xl border border-slate-200 bg-white p-3 shadow-sm"
+        onSubmit={(event) => {
+          event.preventDefault();
+          setPage(1);
+          setAppliedFilters({ ...filters });
+        }}
+      >
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-[minmax(160px,1.2fr)_150px_150px_minmax(160px,1fr)_160px_minmax(160px,1fr)_auto] xl:items-end">
+          <label className="block text-xs font-medium text-slate-600">
+            ค้นหา
+            <input
+              className="mt-1 h-9 w-full rounded-md border border-slate-300 px-3 text-sm outline-none focus:border-blue-500"
+              value={filters.search}
+              onChange={(event) => setFilters({ ...filters, search: event.target.value })}
+              placeholder="ค้นหา เลขที่บิล / SN / Reference"
+            />
+          </label>
+          <label className="block text-xs font-medium text-slate-600">
+            วันที่สร้าง
+            <span className="mt-1 block">
+              <DatePicker variant="compact" value={filters.date_from} onChange={(value) => setFilters({ ...filters, date_from: value })} />
+            </span>
+          </label>
+          <label className="block text-xs font-medium text-slate-600">
+            ถึงวันที่
+            <span className="mt-1 block">
+              <DatePicker variant="compact" value={filters.date_to} onChange={(value) => setFilters({ ...filters, date_to: value })} />
+            </span>
+          </label>
+          <div className="text-xs font-medium text-slate-600">
+            เจ้าของงาน
+            <SearchableSelect
+              className="mt-1"
+              compact
+              portal
+              value={filters.customer_id}
+              onChange={(value) => setFilters({ ...filters, customer_id: value })}
+              options={[
+                { value: "", label: "เจ้าของงานทั้งหมด" },
+                ...customers.map((customer) => ({
+                  value: String(customer.id),
+                  label: customer.code ? `${customer.code} - ${customer.name}` : customer.name,
+                })),
+              ]}
+            />
+          </div>
+          <div className="text-xs font-medium text-slate-600">
+            รับสินค้าจาก
+            <Select
+              className="!mt-1 !h-9 !rounded-md"
+              value={filters.pickup_type}
+              onChange={(value) => setFilters({ ...filters, pickup_type: value })}
+              options={[
+                { value: "", label: "ทั้งหมด" },
+                { value: "CUSTOMER", label: "เจ้าของงาน" },
+                { value: "SHIPPER", label: "ผู้ส่ง" },
+              ]}
+            />
+          </div>
+          <div className="text-xs font-medium text-slate-600">
+            คลังรับเข้า
+            <SearchableSelect
+              className="mt-1"
+              compact
+              portal
+              value={filters.warehouse_id}
+              onChange={(value) => setFilters({ ...filters, warehouse_id: value })}
+              options={[
+                { value: "", label: "คลังรับเข้าทั้งหมด" },
+                ...warehouses.flatMap((warehouse) => {
+                  const id = warehouse.warehouse_id ?? warehouse.id;
+                  return id == null ? [] : [{ value: String(id), label: warehouse.warehouse_name ?? warehouse.name ?? String(id) }];
+                }),
+              ]}
+            />
+          </div>
+          <button type="submit" className="h-9 rounded-md bg-blue-600 px-4 text-xs font-semibold text-white hover:bg-blue-700">
+            ค้นหา
+          </button>
+        </div>
+      </form>
 
       <div className="min-h-0 flex-1 overflow-hidden">
         {error ? (
-          <div className="flex h-full items-center justify-center rounded-2xl border border-rose-200 bg-rose-50 px-4 text-sm text-rose-700">{error}</div>
+          <div className="flex h-full items-center justify-center rounded-2xl border border-rose-200 bg-rose-50 px-4 text-sm text-rose-700">
+            {error}
+          </div>
         ) : (
           <DataGrid
             rows={gridRows}

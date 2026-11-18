@@ -962,7 +962,7 @@ export default function ManageRecipients() {
             />
 
           <input
-            placeholder="ค้นหา code / ชื่อผู้รับ / ที่อยู่ / เบอร์ / รหัสไปรษณีย์"
+            placeholder="ค้นหา Code / ชื่อผู้รับ / ที่อยู่ / เบอร์ / รหัสไปรษณีย์"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="input-modern w-full lg:w-[360px]"

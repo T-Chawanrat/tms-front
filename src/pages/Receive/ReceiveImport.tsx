@@ -200,6 +200,7 @@ export default function ReceiveImport() {
   const [success, setSuccess] = useState<string | null>(null);
 
   const selectedCustomerId = customerId;
+  const requiresWarehouse = rows.length === 0 || rows.some((row) => !["CUSTOMER", "SHIPPER"].includes(row.PICKUP.trim().toUpperCase()));
   const warehouseOptions = useMemo<SearchableOption[]>(
     () => warehouses.map((warehouse) => ({ value: String(warehouse.id), label: warehouse.name })),
     [warehouses],
@@ -257,7 +258,7 @@ export default function ReceiveImport() {
 
   const disabledReason = !selectedCustomerId
     ? "ยังไม่ได้เลือกเจ้าของงาน"
-    : !assignedWarehouseId
+    : requiresWarehouse && !assignedWarehouseId
       ? "ยังไม่ได้เลือกคลังดูแลงาน"
     : !file
       ? "ยังไม่ได้เลือกไฟล์ Excel"
@@ -377,7 +378,7 @@ export default function ReceiveImport() {
       return;
     }
 
-    if (!assignedWarehouseId) {
+    if (requiresWarehouse && !assignedWarehouseId) {
       setError("กรุณาเลือกคลังก่อนนำเข้า");
       return;
     }
@@ -495,14 +496,15 @@ export default function ReceiveImport() {
             <label className="mb-1 block text-xs font-semibold text-slate-700">คลังต้นทาง</label>
             <div className={saving ? "pointer-events-none opacity-70" : ""}>
               <SearchableSelect
-                value={assignedWarehouseId}
+                value={requiresWarehouse ? assignedWarehouseId : ""}
                 options={warehouseOptions}
                 onChange={(value) => {
                   setAssignedWarehouseId(value);
                   setError(null);
                   setSuccess(null);
                 }}
-                placeholder="เลือกคลังต้นทาง"
+                placeholder={requiresWarehouse ? "เลือกคลังต้นทาง" : "กำหนดคลังอัตโนมัติ"}
+                disabled={!requiresWarehouse || saving}
                 compact
               />
             </div>

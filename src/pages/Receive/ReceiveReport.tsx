@@ -377,7 +377,7 @@ export default function ReceiveReport() {
             />
           </div>
 
-          <FilterInput value={filters.receive_code} onChange={(value) => updateFilter("receive_code", value)} placeholder="Receive Code / Serial No / Reference" />
+          <FilterInput value={filters.receive_code} onChange={(value) => updateFilter("receive_code", value)} placeholder="ค้นหา เลขที่บิล / SN / Reference" />
 
           <FilterDropdown
             value={filters.customer_id}
