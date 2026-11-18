@@ -54,7 +54,6 @@ export default function ManageVehicles() {
     license_plate_province_id: "",
     license_plate_province: "",
     brand_id: "",
-    brand_other_name: "",
     model: "",
     color: "",
     vehicle_year: "",
@@ -204,14 +203,10 @@ export default function ManageVehicles() {
     setEditing(row);
 
     setForm({
-      license_plate: formatLicensePlate(
-        row.license_plate || "",
-        truckPlateTypeIds.has(String(row.vehicle_type_id)),
-      ),
+      license_plate: formatLicensePlate(row.license_plate || "", truckPlateTypeIds.has(String(row.vehicle_type_id))),
       license_plate_province_id: row.license_plate_province_id ? String(row.license_plate_province_id) : "",
       license_plate_province: row.license_plate_province || "",
       brand_id: row.brand_id ? String(row.brand_id) : "",
-      brand_other_name: "",
       model: row.model || "",
       color: row.color || "",
       vehicle_year: row.vehicle_year ? String(row.vehicle_year) : "",
@@ -243,16 +238,15 @@ export default function ManageVehicles() {
   };
 
   const validateForm = () => {
+    if (!form.vehicle_type_id) return "กรุณาเลือกประเภทรถ";
+    if (!form.brand_id) return "กรุณาเลือกยี่ห้อรถ";
     if (!form.license_plate) return "กรุณากรอกทะเบียนรถ";
     if (!form.license_plate_province_id) return "กรุณาเลือกจังหวัดทะเบียน";
-    if (!form.brand_id) return "กรุณาเลือกยี่ห้อรถ";
-    if (form.brand_id === "__OTHER__" && !form.brand_other_name.trim()) return "กรุณากรอกยี่ห้อรถ";
-    if (!form.vehicle_type_id) return "กรุณาเลือกประเภทรถ";
     if (truckPlateTypeIds.has(form.vehicle_type_id) && !/^\d{2}-\d{4}$/.test(form.license_plate)) {
       return "รถบรรทุก 6 ล้อและ 10 ล้อ ต้องใช้ทะเบียนรูปแบบ 71-4585";
     }
     if (!form.capacity_kg) return "กรุณากรอกน้ำหนักใช้งานจริง (kg)";
-    if (!form.warehouse_id) return "กรุณาเลือก warehouse";
+    if (!form.warehouse_id) return "กรุณาเลือกคลัง";
     if (!form.owner_type) return "กรุณาเลือกเจ้าของรถ";
 
     return "";
@@ -263,7 +257,6 @@ export default function ManageVehicles() {
       license_plate: form.license_plate.slice(0, 7),
       license_plate_province_id: form.license_plate_province_id,
       brand_id: form.brand_id,
-      brand_name: form.brand_id === "__OTHER__" ? form.brand_other_name.trim() : null,
       model: form.model || null,
       color: form.color || null,
       vehicle_year: form.vehicle_year.slice(0, 4) || null,
@@ -431,7 +424,7 @@ export default function ManageVehicles() {
       },
       {
         field: "warehouse_name",
-        headerName: "สังกัด",
+        headerName: "คลังสังกัด",
         width: 170,
         minWidth: 140,
         renderCell: (params: any) => (
@@ -570,11 +563,26 @@ export default function ManageVehicles() {
             }}
           />
 
-          <Select value={String(filterType)} onChange={(next) => setFilterType(next)} options={[{ value: "", label: "ประเภทรถ" }, ...vehicleTypes.map((x) => ({ value: String(x.id), label: x.name }))]} className="!w-[180px] shrink-0" />
+          <Select
+            value={String(filterType)}
+            onChange={(next) => setFilterType(next)}
+            options={[{ value: "", label: "ประเภทรถ" }, ...vehicleTypes.map((x) => ({ value: String(x.id), label: x.name }))]}
+            className="!w-[180px] shrink-0"
+          />
 
-          <Select value={String(filterOwnerType)} onChange={(next) => setFilterOwnerType(next)} options={[{ value: "", label: "เจ้าของรถ" }, ...OWNER_TYPES.map((x) => ({ value: String(x.value), label: x.label }))]} className="!w-[160px] shrink-0" />
+          <Select
+            value={String(filterOwnerType)}
+            onChange={(next) => setFilterOwnerType(next)}
+            options={[{ value: "", label: "เจ้าของรถ" }, ...OWNER_TYPES.map((x) => ({ value: String(x.value), label: x.label }))]}
+            className="!w-[160px] shrink-0"
+          />
 
-          <Select value={String(filterStatus)} onChange={(next) => setFilterStatus(next)} options={[{ value: "", label: "สถานะ" }, ...STATUS.map((x) => ({ value: String(x.value), label: x.label }))]} className="!w-[160px] shrink-0" />
+          <Select
+            value={String(filterStatus)}
+            onChange={(next) => setFilterStatus(next)}
+            options={[{ value: "", label: "สถานะ" }, ...STATUS.map((x) => ({ value: String(x.value), label: x.label }))]}
+            className="!w-[160px] shrink-0"
+          />
 
           <button type="button" onClick={fetchData} className="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700">
             ค้นหา
@@ -583,7 +591,16 @@ export default function ManageVehicles() {
 
         {/* DATAGRID */}
         <div className="flex-1 min-h-0 overflow-hidden">
-          <DataGrid rows={gridRows} columns={vehicleColumns} loading={loading} getRowId={(row: any) => row.id} height="100%" pageSize={100} striped rowHoverColor="#dbeafe" />
+          <DataGrid
+            rows={gridRows}
+            columns={vehicleColumns}
+            loading={loading}
+            getRowId={(row: any) => row.id}
+            height="100%"
+            pageSize={100}
+            striped
+            rowHoverColor="#dbeafe"
+          />
         </div>
 
         {/* CREATE / EDIT MODAL */}
@@ -593,7 +610,12 @@ export default function ManageVehicles() {
               className="relative bg-white p-6 rounded-2xl shadow-xl w-[820px] max-h-[96dvh] overflow-auto animate-scaleIn"
               onClick={(e) => e.stopPropagation()}
             >
-              <button type="button" onClick={closeModal} className="absolute right-4 top-4 inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700" aria-label="ปิด">
+              <button
+                type="button"
+                onClick={closeModal}
+                className="absolute right-4 top-4 inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                aria-label="ปิด"
+              >
                 <X size={18} />
               </button>
               <h3 className="text-lg font-semibold text-slate-800 mb-5">{editing ? "แก้ไขรถ" : "เพิ่มรถ"}</h3>
@@ -602,25 +624,26 @@ export default function ManageVehicles() {
 
               <div className="space-y-5">
                 <div>
-                  <div className="text-sm font-semibold text-slate-700 mb-3">ข้อมูลรถ</div>
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <RequiredLabel required>ประเภทรถ</RequiredLabel>
-                      <Select value={String(form.vehicle_type_id)} onChange={(next) => handleVehicleTypeChange(next)} options={[{ value: "", label: "เลือกประเภทรถ" }, ...vehicleTypes.map((x) => ({ value: String(x.id), label: x.name }))]} />
+                      <Select
+                        value={String(form.vehicle_type_id)}
+                        onChange={(next) => handleVehicleTypeChange(next)}
+                        options={[{ value: "", label: "เลือกประเภทรถ" }, ...vehicleTypes.map((x) => ({ value: String(x.id), label: x.name }))]}
+                      />
                     </div>
 
                     <div>
                       <RequiredLabel required>ยี่ห้อรถ</RequiredLabel>
-                      <Select value={String(form.brand_id)} onChange={(next) => handleChange("brand_id", next)} options={[{ value: "", label: "เลือกยี่ห้อ" }, ...brands.map((b) => ({ value: String(b.id), label: b.name })), { value: "__OTHER__", label: "อื่นๆ" }]} />
-                      {form.brand_id === "__OTHER__" && (
-                        <input
-                          className="input-modern mt-2 w-full"
-                          value={form.brand_other_name}
-                          onChange={(e) => handleChange("brand_other_name", e.target.value)}
-                          placeholder="กรอกยี่ห้อรถ"
-                        />
-                      )}
+                      <Select
+                        value={String(form.brand_id)}
+                        onChange={(next) => handleChange("brand_id", next)}
+                        options={[
+                          { value: "", label: "เลือกยี่ห้อ" },
+                          ...brands.map((b) => ({ value: String(b.id), label: b.name })),
+                        ]}
+                      />
                     </div>
 
                     <div>
@@ -631,17 +654,18 @@ export default function ManageVehicles() {
                         value={form.license_plate}
                         maxLength={7}
                         onChange={(e) => {
-                          handleChange(
-                            "license_plate",
-                            formatLicensePlate(e.target.value, truckPlateTypeIds.has(form.vehicle_type_id)),
-                          );
+                          handleChange("license_plate", formatLicensePlate(e.target.value, truckPlateTypeIds.has(form.vehicle_type_id)));
                         }}
                       />
                     </div>
 
                     <div>
                       <RequiredLabel required>จังหวัดทะเบียน</RequiredLabel>
-                      <Select value={String(form.license_plate_province_id)} onChange={(next) => handleChange("license_plate_province_id", next)} options={[{ value: "", label: "เลือกจังหวัด" }, ...provinces.map((p) => ({ value: String(p.id), label: p.province_name }))]} />
+                      <Select
+                        value={String(form.license_plate_province_id)}
+                        onChange={(next) => handleChange("license_plate_province_id", next)}
+                        options={[{ value: "", label: "เลือกจังหวัด" }, ...provinces.map((p) => ({ value: String(p.id), label: p.province_name }))]}
+                      />
                     </div>
 
                     <div>
@@ -677,13 +701,17 @@ export default function ManageVehicles() {
 
                     <div>
                       <RequiredLabel>เชื้อเพลิง</RequiredLabel>
-                      <Select value={String(form.fuel_type)} onChange={(next) => handleChange("fuel_type", next)} options={[{ value: "", label: "เลือกเชื้อเพลิง" }, ...FUEL_TYPES.map((x) => ({ value: String(x.value), label: x.label }))]} />
+                      <Select
+                        value={String(form.fuel_type)}
+                        onChange={(next) => handleChange("fuel_type", next)}
+                        options={[{ value: "", label: "เลือกเชื้อเพลิง" }, ...FUEL_TYPES.map((x) => ({ value: String(x.value), label: x.label }))]}
+                      />
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <div className="text-sm font-semibold text-slate-700 mb-3">น้ำหนัก / สังกัด</div>
+                  <div className="text-sm font-semibold text-slate-700 mb-3">น้ำหนัก / คลัง</div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -707,13 +735,21 @@ export default function ManageVehicles() {
                     </div>
 
                     <div>
-                      <RequiredLabel required>Warehouse</RequiredLabel>
-                      <Select value={String(form.warehouse_id)} onChange={(next) => handleChange("warehouse_id", next)} options={[{ value: "", label: "เลือก warehouse" }, ...warehouses.map((w) => ({ value: String(w.id), label: w.name }))]} />
+                      <RequiredLabel required>คลังสังกัด</RequiredLabel>
+                      <Select
+                        value={String(form.warehouse_id)}
+                        onChange={(next) => handleChange("warehouse_id", next)}
+                        options={[{ value: "", label: "เลือกคลัง" }, ...warehouses.map((w) => ({ value: String(w.id), label: w.name }))]}
+                      />
                     </div>
 
                     <div>
                       <RequiredLabel required>เจ้าของรถ</RequiredLabel>
-                      <Select value={String(form.owner_type)} onChange={(next) => handleChange("owner_type", next)} options={[...OWNER_TYPES.map((x) => ({ value: String(x.value), label: x.label }))]} />
+                      <Select
+                        value={String(form.owner_type)}
+                        onChange={(next) => handleChange("owner_type", next)}
+                        options={[...OWNER_TYPES.map((x) => ({ value: String(x.value), label: x.label }))]}
+                      />
                     </div>
                   </div>
                 </div>
@@ -790,7 +826,15 @@ export default function ManageVehicles() {
         )}
 
         {/* STATUS MODAL */}
-        <StatusModal open={statusModal} current={selected?.current === "ACTIVE" || selected?.current === "INACTIVE" || selected?.current === "MAINTENANCE" ? selected.current : null} showMaintenance onClose={closeStatusModal} onChange={(status) => void changeStatus(status)} />
+        <StatusModal
+          open={statusModal}
+          current={
+            selected?.current === "ACTIVE" || selected?.current === "INACTIVE" || selected?.current === "MAINTENANCE" ? selected.current : null
+          }
+          showMaintenance
+          onClose={closeStatusModal}
+          onChange={(status) => void changeStatus(status)}
+        />
       </div>
     </LocalizationProvider>
   );

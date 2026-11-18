@@ -504,6 +504,7 @@ export default function ManageRoutes() {
               </button>
             </div>
             <div className="grid gap-4 p-5 sm:grid-cols-2">
+              {routeFormError && <div role="alert" className="sm:col-span-2 px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm">{routeFormError}</div>}
               <div className="sm:col-span-2">
                 <label className="mb-1.5 block text-sm font-medium text-slate-700">คลัง</label>
                 <Select value={String(selectedWarehouseId)} onChange={(next) => setSelectedWarehouseId(next)} placeholder="เลือกคลัง" options={warehouses.map((warehouse) => ({ value: String(warehouse.id), label: warehouse.name }))} />
@@ -527,7 +528,6 @@ export default function ManageRoutes() {
                 />
               </div>
             </div>
-            {routeFormError && <div className="px-5 pb-3 text-sm text-red-500">{routeFormError}</div>}
             <div className="flex justify-end gap-3 border-t border-slate-100 px-5 py-4">
               <button
                 type="button"
@@ -569,6 +569,7 @@ export default function ManageRoutes() {
               </button>
             </div>
             <div className="space-y-5 p-5">
+              {detailFormError && <div role="alert" className="px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm">{detailFormError}</div>}
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-slate-700">ตำบล / อำเภอ / จังหวัด</label>
                 <AddressSearchDropdown
@@ -604,7 +605,6 @@ export default function ManageRoutes() {
                 </div>
               </div>
             </div>
-            {detailFormError && <div className="px-5 pb-3 text-sm text-red-500">{detailFormError}</div>}
             <div className="flex justify-end gap-3 border-t border-slate-100 px-5 py-4">
               <button
                 type="button"

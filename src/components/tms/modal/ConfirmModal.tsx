@@ -6,6 +6,7 @@ type Props = {
   open: boolean;
   title: string;
   description?: ReactNode;
+  error?: string;
   loading?: boolean;
   confirmLabel?: string;
   cancelLabel?: string;
@@ -18,7 +19,7 @@ type Props = {
   onConfirm: () => void;
 };
 
-export default function ConfirmModal({ open, title, description, loading = false, confirmLabel = "ยืนยัน", cancelLabel = "ยกเลิก", loadingLabel = "กำลังบันทึก...", danger = false, success = false, closeOnBackdrop = true, closeOnEscape = true, onClose, onConfirm }: Props) {
+export default function ConfirmModal({ open, title, description, error, loading = false, confirmLabel = "ยืนยัน", cancelLabel = "ยกเลิก", loadingLabel = "กำลังบันทึก...", danger = false, success = false, closeOnBackdrop = true, closeOnEscape = true, onClose, onConfirm }: Props) {
   return (
     <Modal open={open} onClose={(_, reason) => { if (!loading && (closeOnBackdrop || reason !== "backdropClick") && (closeOnEscape || reason !== "escapeKeyDown")) onClose(); }} aria-labelledby="confirm-modal-title" aria-describedby={description ? "confirm-modal-description" : undefined} className="flex items-center justify-center p-4">
       <div className="font-thai w-full max-w-sm animate-scaleIn rounded-2xl bg-white shadow-xl outline-none">
@@ -27,6 +28,7 @@ export default function ConfirmModal({ open, title, description, loading = false
           <button type="button" disabled={loading} onClick={onClose} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 disabled:opacity-50" aria-label="ปิด"><X size={20} /></button>
         </div>
         {description && <div id="confirm-modal-description" className="px-5 py-4 text-sm text-slate-600">{description}</div>}
+        {error && <div role="alert" className="mx-5 mb-4 px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm">{error}</div>}
         <div className="flex justify-end gap-3 border-t border-slate-100 px-5 py-4">
           <button type="button" disabled={loading} onClick={onClose} className="rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 disabled:opacity-60">{cancelLabel}</button>
           <button type="button" disabled={loading} onClick={onConfirm} className={`rounded-lg px-4 py-2 text-sm font-medium text-white disabled:opacity-60 ${danger ? "bg-red-600 hover:bg-red-700" : success ? "bg-emerald-600 hover:bg-emerald-700" : "bg-blue-600 hover:bg-blue-700"}`}>{loading ? loadingLabel : confirmLabel}</button>

@@ -9,6 +9,7 @@ import DataGrid from "../../components/tms/table/DataGrid";
 import RequiredLabel from "../../components/tms/form/RequiredLabel";
 
 export default function ManageCustomers() {
+  const [error, setError] = useState("");
 
   const [rows, setRows] = useState<any[]>([]);
   const [search, setSearch] = useState("");
@@ -160,18 +161,21 @@ export default function ManageCustomers() {
   };
 
   const closeCustomerModal = () => {
+    setError("");
     setShowModal(false);
     setEditingCustomer(null);
     resetCustomerForm();
   };
 
   const closeUserModal = () => {
+    setError("");
     setShowUserModal(false);
     setSelectedCustomer(null);
     resetUserForm();
   };
 
   const closeStatusModal = () => {
+    setError("");
     setStatusModal(false);
     setSelectedStatus(null);
   };
@@ -180,17 +184,18 @@ export default function ManageCustomers() {
   // CREATE / UPDATE CUSTOMER
   // =====================
   const handleSaveCustomer = async () => {
+    setError("");
     try {
       const code = cleanCodeInput(form.code);
       const name = cleanNameInput(form.name);
 
       if (!code) {
-        alert("กรุณากรอกรหัสลูกค้า");
+        setError("กรุณากรอกรหัสลูกค้า");
         return;
       }
 
       if (!name) {
-        alert("กรุณากรอกชื่อลูกค้า");
+        setError("กรุณากรอกชื่อลูกค้า");
         return;
       }
 
@@ -207,7 +212,7 @@ export default function ManageCustomers() {
       };
 
       if ((payload.tel && !payload.tel.startsWith("0")) || (payload.contact_tel && !payload.contact_tel.startsWith("0"))) {
-        alert("เบอร์โทรต้องขึ้นต้นด้วย 0");
+        setError("เบอร์โทรต้องขึ้นต้นด้วย 0");
         return;
       }
 
@@ -220,7 +225,7 @@ export default function ManageCustomers() {
       closeCustomerModal();
       fetchData();
     } catch (err: any) {
-      alert(err?.response?.data?.message || "save customer failed");
+      setError(err?.response?.data?.message || "save customer failed");
     }
   };
 
@@ -247,7 +252,7 @@ export default function ManageCustomers() {
       closeStatusModal();
       fetchData();
     } catch (err: any) {
-      alert(err?.response?.data?.message || "update status failed");
+      setError(err?.response?.data?.message || "update status failed");
     }
   };
 
@@ -261,6 +266,7 @@ export default function ManageCustomers() {
   };
 
   const handleCreateUser = async () => {
+    setError("");
     if (!selectedCustomer) return;
 
     const username = cleanCodeInput(userForm.username);
@@ -268,17 +274,17 @@ export default function ManageCustomers() {
     const last_name = cleanNameInput(userForm.last_name);
 
     if (!username) {
-      alert("กรุณากรอก Username");
+      setError("กรุณากรอก Username");
       return;
     }
 
     if (!first_name) {
-      alert("กรุณากรอกชื่อ");
+      setError("กรุณากรอกชื่อ");
       return;
     }
 
     if (!last_name) {
-      alert("กรุณากรอกนามสกุล");
+      setError("กรุณากรอกนามสกุล");
       return;
     }
 
@@ -292,7 +298,7 @@ export default function ManageCustomers() {
 
       closeUserModal();
     } catch (err: any) {
-      alert(err?.response?.data?.message || "create user failed");
+      setError(err?.response?.data?.message || "create user failed");
     }
   };
 
@@ -524,6 +530,7 @@ export default function ManageCustomers() {
               <X size={18} />
             </button>
             <h3 className="text-lg font-semibold text-slate-800 mb-5">{editingCustomer ? "แก้ไขลูกค้า" : "เพิ่มลูกค้า"}</h3>
+            {error && <div role="alert" className="mb-4 px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm">{error}</div>}
 
             <div className="space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -643,7 +650,7 @@ export default function ManageCustomers() {
       )}
 
       {/* STATUS MODAL */}
-      <StatusModal open={statusModal} current={selectedStatus ? selectedStatus.current === 1 ? "ACTIVE" : "INACTIVE" : null} onClose={closeStatusModal} onChange={(status) => void changeStatus(status === "ACTIVE" ? 1 : 0)} />
+      <StatusModal open={statusModal} error={error} current={selectedStatus ? selectedStatus.current === 1 ? "ACTIVE" : "INACTIVE" : null} onClose={closeStatusModal} onChange={(status) => void changeStatus(status === "ACTIVE" ? 1 : 0)} />
 
       {/* CREATE CUSTOMER USER MODAL */}
       {showUserModal && (
@@ -653,6 +660,7 @@ export default function ManageCustomers() {
               <X size={18} />
             </button>
             <h3 className="text-lg font-semibold text-slate-800 mb-5">เพิ่ม User ให้ {selectedCustomer?.name}</h3>
+            {error && <div role="alert" className="mb-4 px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm">{error}</div>}
 
             <div className="space-y-3">
               <div>

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import StatusModal from "../../components/tms/modal/StatusModal";
+import { showErrorToast } from "../../utils/toast";
 import SearchableSelect from "../../components/tms/form/SearchableSelect";
 import AxiosInstance from "../../services/apiClient";
 import { useAuth } from "../../context/AuthContext";
@@ -70,6 +71,7 @@ const emptyDetailForm = {
 };
 
 export default function ManagePackages() {
+  const [error, setError] = useState("");
   const { user } = useAuth();
 
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -140,7 +142,7 @@ export default function ManagePackages() {
 
       setCustomers(activeCustomers);
     } catch (err: any) {
-      alert(err?.response?.data?.message || "fetch customers failed");
+      showErrorToast(err?.response?.data?.message || "ไม่สามารถโหลดข้อมูลเจ้าของงานได้");
     }
   };
 
@@ -164,7 +166,7 @@ export default function ManagePackages() {
       const res = await AxiosInstance.get("/manage/packages", { params });
       setRows(res.data || []);
     } catch (err: any) {
-      alert(err?.response?.data?.message || "fetch packages failed");
+      showErrorToast(err?.response?.data?.message || "ไม่สามารถโหลดข้อมูลแพ็กเกจได้");
     } finally {
       setLoading(false);
     }
@@ -179,7 +181,7 @@ export default function ManagePackages() {
       setSelectedPackage(res.data);
       setDetails(Array.isArray(res.data?.details) ? res.data.details : []);
     } catch (err: any) {
-      alert(err?.response?.data?.message || "fetch package details failed");
+      setError(err?.response?.data?.message || "ไม่สามารถโหลดรายละเอียดแพ็กเกจได้");
     } finally {
       setDetailLoading(false);
     }
@@ -203,8 +205,9 @@ export default function ManagePackages() {
   }, [customerId]);
 
   const openCreate = () => {
+    setError("");
     if (!customerId) {
-      alert("กรุณาเลือกลูกค้าก่อน");
+      showErrorToast("กรุณาเลือกเจ้าของงานก่อน");
       return;
     }
 
@@ -213,6 +216,7 @@ export default function ManagePackages() {
   };
 
   const openEdit = (row: PackageRow) => {
+    setError("");
     setEditing(row);
 
     setForm({
@@ -225,26 +229,28 @@ export default function ManagePackages() {
   };
 
   const closeModal = () => {
+    setError("");
     setShowModal(false);
     resetForm();
   };
 
   const handleSave = async () => {
+    setError("");
     const package_code = cleanCodeInput(form.package_code);
     const package_name = form.package_name.trim();
 
     if (!package_code) {
-      alert("กรุณากรอก Package Code");
+      setError("กรุณากรอกรหัสแพ็กเกจ");
       return;
     }
 
     if (!package_name) {
-      alert("กรุณากรอก Package Name");
+      setError("กรุณากรอกชื่อแพ็กเกจ");
       return;
     }
 
     if (!customerId && !editing?.customer_id) {
-      alert("กรุณาเลือกลูกค้าก่อน");
+      setError("กรุณาเลือกเจ้าของงานก่อน");
       return;
     }
 
@@ -267,13 +273,14 @@ export default function ManagePackages() {
       closeModal();
       fetchData();
     } catch (err: any) {
-      alert(err?.response?.data?.message || "save package failed");
+      setError(err?.response?.data?.message || "ไม่สามารถบันทึกแพ็กเกจได้");
     } finally {
       setSaving(false);
     }
   };
 
   const openDetails = async (row: PackageRow) => {
+    setError("");
     setSelectedPackage(row);
     setDetails([]);
     setShowDetailModal(true);
@@ -281,6 +288,7 @@ export default function ManagePackages() {
   };
 
   const closeDetailModal = () => {
+    setError("");
     setShowDetailModal(false);
     setSelectedPackage(null);
     setDetails([]);
@@ -288,11 +296,13 @@ export default function ManagePackages() {
   };
 
   const openCreateDetail = () => {
+    setError("");
     resetDetailForm();
     setShowDetailFormModal(true);
   };
 
   const openEditDetail = (row: DetailRow) => {
+    setError("");
     setEditingDetail(row);
 
     setDetailForm({
@@ -311,11 +321,13 @@ export default function ManagePackages() {
   };
 
   const closeDetailFormModal = () => {
+    setError("");
     setShowDetailFormModal(false);
     resetDetailForm();
   };
 
   const handleSaveDetail = async () => {
+    setError("");
     if (!selectedPackage) return;
 
     const package_detail_code = cleanCodeInput(detailForm.package_detail_code);
@@ -349,13 +361,14 @@ export default function ManagePackages() {
       fetchDetails(selectedPackage.package_id);
       fetchData();
     } catch (err: any) {
-      alert(err?.response?.data?.message || "save detail failed");
+      setError(err?.response?.data?.message || "ไม่สามารถบันทึกราคาได้");
     } finally {
       setSaving(false);
     }
   };
 
   const openStatusModal = (mode: "PACKAGE" | "DETAIL", row: any) => {
+    setError("");
     setSelectedStatus({
       mode,
       id: mode === "PACKAGE" ? row.package_id : row.id,
@@ -366,6 +379,7 @@ export default function ManagePackages() {
   };
 
   const closeStatusModal = () => {
+    setError("");
     setStatusModal(false);
     setSelectedStatus(null);
   };
@@ -395,7 +409,7 @@ export default function ManagePackages() {
 
       closeStatusModal();
     } catch (err: any) {
-      alert(err?.response?.data?.message || "update status failed");
+      setError(err?.response?.data?.message || "ไม่สามารถเปลี่ยนสถานะได้");
     } finally {
       setSaving(false);
     }
@@ -638,10 +652,10 @@ export default function ManagePackages() {
         <SearchableSelect
           value={customerId}
           onChange={setCustomerId}
-          placeholder="เลือกลูกค้า"
+          placeholder="เลือกเจ้าของงาน"
           className="!w-full sm:!w-[32rem]"
           options={[
-            { value: "", label: "เลือกลูกค้า" },
+            { value: "", label: "เลือกเจ้าของงาน" },
             ...customers.map((c) => ({ value: String(c.id), label: `${c.id} ${c.code ? `${c.code} - ` : ""}${c.name} (${c.type})` })),
           ]}
         />
@@ -689,6 +703,7 @@ export default function ManagePackages() {
               <X size={18} />
             </button>
             <h3 className="text-lg font-semibold text-slate-800 mb-5">{editing ? "แก้ไข Package" : "เพิ่ม Package"}</h3>
+            {error && <div role="alert" className="mb-4 px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm">{error}</div>}
 
             <div className="space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -782,6 +797,7 @@ export default function ManagePackages() {
             </div>
 
             <div className="flex-1 min-h-0 overflow-hidden">
+              {!showDetailFormModal && !statusModal && error && <div role="alert" className="mb-4 px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm">{error}</div>}
               <DataGrid
                 rows={detailGridRows}
                 columns={detailColumns}
@@ -813,6 +829,7 @@ export default function ManagePackages() {
             </button>
             <h3 className="text-lg font-semibold text-slate-800 mb-1">{editingDetail ? "แก้ไขราคา" : "เพิ่มราคา"}</h3>
             <p className="text-sm text-slate-500 mb-5">ประเภท: {selectedPackageType || "-"}</p>
+            {error && <div role="alert" className="mb-4 px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm">{error}</div>}
 
             <div className="space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -929,6 +946,7 @@ export default function ManagePackages() {
       )}
 
       <StatusModal
+        error={error}
         open={statusModal}
         current={selectedStatus ? (selectedStatus.current === "Y" ? "ACTIVE" : "INACTIVE") : null}
         loading={saving}

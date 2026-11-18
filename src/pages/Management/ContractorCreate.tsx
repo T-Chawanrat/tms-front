@@ -212,6 +212,7 @@ export default function ContractorCreate() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {error && <div role="alert" className="mb-4 px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm">{error}</div>}
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="mb-4 flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
             <h2 className="font-semibold text-slate-700">ข้อมูลบัญชีคนขับ</h2>
@@ -402,12 +403,6 @@ export default function ContractorCreate() {
             </div>
           </div>
         </div>
-
-        {error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-            {error}
-          </div>
-        )}
 
         <div className="flex justify-end">
           <button

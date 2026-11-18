@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import * as XLSX from "xlsx";
 import axios from "axios";
+import { showErrorToast, showSuccessToast } from "../../utils/toast";
 import ResizableColumns from "../../components/tms/table/ResizableColumns";
 import { useAuth } from "../../context/AuthContext";
 import AxiosInstance from "../../services/apiClient";
@@ -418,7 +419,9 @@ export default function ReceiveImport() {
 
       formData.append("file", file);
       formData.append("customer_id", String(selectedCustomerId));
-      formData.append("assigned_warehouse_id", assignedWarehouseId);
+      if (requiresWarehouse) {
+        formData.append("assigned_warehouse_id", assignedWarehouseId);
+      }
 
       const res = await AxiosInstance.post<ImportResponse>("/create/receives/import", formData, {
         headers: {
@@ -427,12 +430,18 @@ export default function ReceiveImport() {
       });
 
       setSuccess(`นำเข้าสำเร็จ: ทั้งหมด ${res.data?.total_rows ?? rows.length} แถว, บันทึกแล้ว ${res.data?.inserted_rows ?? rows.length} แถว`);
+      showSuccessToast("นำเข้าบิลสำเร็จ", `ทั้งหมด ${res.data?.total_rows ?? rows.length} แถว, บันทึกแล้ว ${res.data?.inserted_rows ?? rows.length} บิล`);
 
       setFile(null);
       setFileName("");
       setRows([]);
     } catch (err) {
       console.error(err);
+      const errorMessage = axios.isAxiosError<ImportResponse>(err)
+        ? err.response?.data?.message || err.response?.data?.error
+        : undefined;
+
+      showErrorToast("นำเข้าบิลไม่สำเร็จ", errorMessage);
 
       if (axios.isAxiosError<ImportResponse>(err)) {
         setError(err.response?.data?.message || err.response?.data?.error || "นำเข้า Excel ไม่สำเร็จ");
@@ -469,7 +478,7 @@ export default function ReceiveImport() {
       </div>
 
       <div className="mb-2 rounded-md border border-slate-200 bg-white p-2 shadow-sm">
-        <div className="grid grid-cols-1 gap-2 xl:grid-cols-[480px_180px_1fr_auto] xl:items-end">
+        <div className={`grid grid-cols-1 gap-2 xl:items-end ${requiresWarehouse ? "xl:grid-cols-[480px_180px_1fr_auto]" : "xl:grid-cols-[480px_1fr_auto]"}`}>
           <div>
             <label className="mb-1 block text-xs font-semibold text-slate-700">เจ้าของงาน</label>
 
@@ -492,32 +501,33 @@ export default function ReceiveImport() {
               </div>
           </div>
 
-          <div>
-            <label className="mb-1 block text-xs font-semibold text-slate-700">คลังต้นทาง</label>
+          {requiresWarehouse && (
             <div className={saving ? "pointer-events-none opacity-70" : ""}>
+              <label className="mb-1 block text-xs font-semibold text-slate-700">คลังต้นทาง</label>
               <SearchableSelect
-                value={requiresWarehouse ? assignedWarehouseId : ""}
+                value={assignedWarehouseId}
                 options={warehouseOptions}
                 onChange={(value) => {
                   setAssignedWarehouseId(value);
                   setError(null);
                   setSuccess(null);
                 }}
-                placeholder={requiresWarehouse ? "เลือกคลังต้นทาง" : "กำหนดคลังอัตโนมัติ"}
-                disabled={!requiresWarehouse || saving}
+                placeholder="เลือกคลังต้นทาง"
+                disabled={saving}
                 compact
               />
             </div>
-          </div>
+          )}
 
           <div>
-            <label className="mb-1 block text-xs font-semibold text-slate-700">ไฟล์ Excel</label>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <label className="inline-flex h-8 cursor-pointer items-center rounded-md border border-blue-200 bg-blue-50 px-3 text-xs font-semibold text-blue-700 hover:bg-blue-100">
-                เลือกไฟล์
-                <input type="file" accept=".xlsx,.xls" onChange={handleFileChange} className="hidden" />
-              </label>
+            <div className="flex flex-wrap items-end gap-2">
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-slate-700">ไฟล์ Excel</label>
+                <label className="inline-flex h-8 cursor-pointer items-center rounded-md border border-blue-200 bg-blue-50 px-3 text-xs font-semibold text-blue-700 hover:bg-blue-100">
+                  เลือกไฟล์
+                  <input type="file" accept=".xlsx,.xls" onChange={handleFileChange} className="hidden" />
+                </label>
+              </div>
 
               <a
                 href="/tamplates/import.xlsx"

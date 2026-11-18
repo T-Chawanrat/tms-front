@@ -111,7 +111,6 @@ export default function ManageUsers() {
 
     setRoles(r.data);
     setWarehouses(w.data);
-
   };
 
   useEffect(() => {
@@ -195,23 +194,18 @@ export default function ManageUsers() {
       const tel = cleanNumberInput(form.tel).slice(0, 10);
       const license_no = cleanNumberInput(form.license_no).slice(0, 8);
 
-      if (tel && !tel.startsWith("0")) {
-        setError("เบอร์โทรต้องขึ้นต้นด้วย 0");
+      if (!username) {
+        setError("กรุณากรอก Username");
+        return;
+      }
+
+      if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+        setError("Username ใช้ได้เฉพาะภาษาอังกฤษ ตัวเลข _ และ -");
         return;
       }
 
       if (!employee_code) {
         setError("กรุณากรอกรหัสพนักงาน");
-        return;
-      }
-
-      if (!username) {
-        setError("กรุณากรอก username");
-        return;
-      }
-
-      if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
-        setError("username ใช้ได้เฉพาะภาษาอังกฤษ ตัวเลข _ และ -");
         return;
       }
 
@@ -230,14 +224,19 @@ export default function ManageUsers() {
         return;
       }
 
+      if (tel && !tel.startsWith("0")) {
+        setError("เบอร์โทรต้องขึ้นต้นด้วย 0");
+        return;
+      }
+
       if (!form.role_id) {
-        setError("กรุณาเลือก role");
+        setError("กรุณาเลือกตำแหน่ง");
         return;
       }
 
       if (!ROLES_WITHOUT_WAREHOUSE_SELECTION.includes(role)) {
         if (!form.warehouse_id) {
-          setError("กรุณาเลือกสังกัดคลัง");
+          setError("กรุณาเลือกคลัง");
           return;
         }
       }
@@ -300,11 +299,6 @@ export default function ManageUsers() {
     const tel = cleanNumberInput(editForm.tel).slice(0, 10);
     const license_no = cleanNumberInput(editForm.license_no).slice(0, 8);
 
-    if (tel && !tel.startsWith("0")) {
-      alert("เบอร์โทรต้องขึ้นต้นด้วย 0");
-      return;
-    }
-
     if (!employee_code) {
       alert("กรุณากรอกรหัสพนักงาน");
       return;
@@ -322,6 +316,11 @@ export default function ManageUsers() {
 
     if (!last_name) {
       alert("กรุณากรอกนามสกุล");
+      return;
+    }
+
+    if (tel && !tel.startsWith("0")) {
+      alert("เบอร์โทรต้องขึ้นต้นด้วย 0");
       return;
     }
 
@@ -483,7 +482,7 @@ export default function ManageUsers() {
       },
       {
         field: "warehouse_name",
-        headerName: "สังกัด",
+        headerName: "คลัง",
         width: 180,
         minWidth: 150,
         renderCell: (params: any) => (
@@ -586,18 +585,24 @@ export default function ManageUsers() {
           </div>
 
           <div className="flex items-center gap-2">
-          <button type="button" onClick={() => navigate("/manage/role-permissions")} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"><ShieldCheck size={17} className="text-blue-600" /> สิทธิ์ตาม Role</button>
-          <button
-            type="button"
-            onClick={() => {
-              resetCreateForm();
-              setShowModal(true);
-              fetchDropdown();
-            }}
-            className="px-5 py-2.5 rounded-xl bg-blue-600 text-white shadow hover:bg-blue-700 transition"
-          >
-            + เพิ่มผู้ใช้
-          </button>
+            <button
+              type="button"
+              onClick={() => navigate("/manage/role-permissions")}
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+            >
+              <ShieldCheck size={17} className="text-blue-600" /> สิทธิ์ตาม Role
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                resetCreateForm();
+                setShowModal(true);
+                fetchDropdown();
+              }}
+              className="px-5 py-2.5 rounded-xl bg-blue-600 text-white shadow hover:bg-blue-700 transition"
+            >
+              + เพิ่มผู้ใช้
+            </button>
           </div>
         </div>
 
@@ -613,7 +618,13 @@ export default function ManageUsers() {
             }}
           />
 
-          <SearchableSelect value={filterRole} onChange={setFilterRole} placeholder="ทุก Role" className="!w-[180px]" options={[{ value: "", label: "ทุก Role" }, ...roles.map((r) => ({ value: String(r.id), label: r.name }))]} />
+          <SearchableSelect
+            value={filterRole}
+            onChange={setFilterRole}
+            placeholder="ทุก Role"
+            className="!w-[180px]"
+            options={[{ value: "", label: "ทุก Role" }, ...roles.map((r) => ({ value: String(r.id), label: r.name }))]}
+          />
 
           <button type="button" onClick={fetchData} className="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700">
             ค้นหา
@@ -622,7 +633,16 @@ export default function ManageUsers() {
 
         {/* DATAGRID */}
         <div className="flex-1 min-h-0 overflow-hidden">
-          <DataGrid rows={gridRows} columns={userColumns} loading={loading} getRowId={(row: any) => row.id} height="100%" pageSize={100} striped rowHoverColor="#dbeafe" />
+          <DataGrid
+            rows={gridRows}
+            columns={userColumns}
+            loading={loading}
+            getRowId={(row: any) => row.id}
+            height="100%"
+            pageSize={100}
+            striped
+            rowHoverColor="#dbeafe"
+          />
         </div>
 
         {/* CREATE MODAL */}
@@ -632,7 +652,12 @@ export default function ManageUsers() {
               className="relative bg-white p-6 rounded-2xl shadow-xl w-[720px] max-h-[90vh] overflow-auto animate-scaleIn"
               onClick={(e) => e.stopPropagation()}
             >
-              <button type="button" onClick={closeCreateModal} className="absolute right-4 top-4 inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700" aria-label="ปิด">
+              <button
+                type="button"
+                onClick={closeCreateModal}
+                className="absolute right-4 top-4 inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                aria-label="ปิด"
+              >
                 <X size={18} />
               </button>
               <h3 className="text-lg font-semibold text-slate-800 mb-5">เพิ่มผู้ใช้</h3>
@@ -697,7 +722,6 @@ export default function ManageUsers() {
                   />
                 </div>
 
-
                 <div>
                   <RequiredLabel>เลขบัตรประชาชน</RequiredLabel>
                   <input
@@ -732,13 +756,25 @@ export default function ManageUsers() {
 
                 <div>
                   <RequiredLabel required>ตำแหน่ง</RequiredLabel>
-                  <SearchableSelect portal value={form.role_id} onChange={(value) => handleChange("role_id", value)} placeholder="เลือกตำแหน่ง" options={roles.filter((r) => Number(r.id) !== 2).map((r) => ({ value: String(r.id), label: r.name }))} />
+                  <SearchableSelect
+                    portal
+                    value={form.role_id}
+                    onChange={(value) => handleChange("role_id", value)}
+                    placeholder="เลือกตำแหน่ง"
+                    options={roles.filter((r) => Number(r.id) !== 2).map((r) => ({ value: String(r.id), label: r.name }))}
+                  />
                 </div>
 
                 {!ROLES_WITHOUT_WAREHOUSE_SELECTION.includes(Number(form.role_id)) && (
                   <div>
-                    <RequiredLabel required>สังกัดคลัง</RequiredLabel>
-                    <SearchableSelect portal value={form.warehouse_id} onChange={(value) => handleChange("warehouse_id", value)} placeholder="เลือกสังกัดคลัง" options={warehouses.map((w) => ({ value: String(w.id), label: w.name }))} />
+                    <RequiredLabel required>คลังสังกัด</RequiredLabel>
+                    <SearchableSelect
+                      portal
+                      value={form.warehouse_id}
+                      onChange={(value) => handleChange("warehouse_id", value)}
+                      placeholder="เลือกคลัง"
+                      options={warehouses.map((w) => ({ value: String(w.id), label: w.name }))}
+                    />
                   </div>
                 )}
               </div>
@@ -788,7 +824,12 @@ export default function ManageUsers() {
               className="relative bg-white p-6 rounded-2xl shadow-xl w-[720px] max-h-[90vh] overflow-auto animate-scaleIn"
               onClick={(e) => e.stopPropagation()}
             >
-              <button type="button" onClick={closeEditModal} className="absolute right-4 top-4 inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700" aria-label="ปิด">
+              <button
+                type="button"
+                onClick={closeEditModal}
+                className="absolute right-4 top-4 inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                aria-label="ปิด"
+              >
                 <X size={18} />
               </button>
               <h3 className="text-lg font-semibold text-slate-800 mb-1">แก้ไขผู้ใช้</h3>
@@ -837,7 +878,6 @@ export default function ManageUsers() {
                     onChange={(e) => handleEditChange("last_name", cleanNameInput(e.target.value))}
                   />
                 </div>
-
 
                 <div>
                   <RequiredLabel>เลขบัตรประชาชน</RequiredLabel>
@@ -906,7 +946,12 @@ export default function ManageUsers() {
         )}
 
         {/* STATUS MODAL */}
-        <StatusModal open={statusModal} current={selected?.current ?? null} onClose={closeStatusModal} onChange={(status) => void changeStatus(status === "ACTIVE" ? "ACTIVE" : "INACTIVE")} />
+        <StatusModal
+          open={statusModal}
+          current={selected?.current ?? null}
+          onClose={closeStatusModal}
+          onChange={(status) => void changeStatus(status === "ACTIVE" ? "ACTIVE" : "INACTIVE")}
+        />
       </div>
     </LocalizationProvider>
   );

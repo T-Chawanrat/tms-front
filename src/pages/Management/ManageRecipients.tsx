@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import StatusModal from "../../components/tms/modal/StatusModal";
+import { showErrorToast } from "../../utils/toast";
 import SearchableSelect from "../../components/tms/form/SearchableSelect";
 import { DataGrid, type GridColDef, type GridPaginationModel } from "@mui/x-data-grid";
 import { ChevronDown, ChevronRight, Pencil, Plus, X } from "lucide-react";
@@ -267,6 +268,7 @@ function RecipientDetailsInlinePanel({ recipient, onCreateDetail, onEditDetail, 
 }
 
 export default function ManageRecipients() {
+  const [error, setError] = useState("");
   const { user } = useAuth();
 
 
@@ -408,11 +410,13 @@ export default function ManageRecipients() {
   };
 
   const closeModal = () => {
+    setError("");
     setShowModal(false);
     resetForm();
   };
 
   const closeStatusModal = () => {
+    setError("");
     setStatusModal(false);
     setSelectedStatus(null);
   };
@@ -424,7 +428,7 @@ export default function ManageRecipients() {
 
       setCustomers(data);
     } catch (err) {
-      alert(getErrorMessage(err, "fetch customers failed"));
+      showErrorToast(getErrorMessage(err, "ไม่สามารถโหลดข้อมูลเจ้าของงานได้"));
     }
   };
 
@@ -433,7 +437,7 @@ export default function ManageRecipients() {
       const res = await AxiosInstance.get("/recipient-types");
       setRecipientTypes(res.data || []);
     } catch (err) {
-      alert(getErrorMessage(err, "fetch recipient types failed"));
+      showErrorToast(getErrorMessage(err, "ไม่สามารถโหลดประเภทผู้รับได้"));
     }
   };
 
@@ -462,7 +466,7 @@ export default function ManageRecipients() {
       setRows(responseData?.data || []);
       setRowCount(Number(responseData?.pagination?.total || 0));
     } catch (err) {
-      alert(getErrorMessage(err, "fetch recipients failed"));
+      showErrorToast(getErrorMessage(err, "ไม่สามารถโหลดข้อมูลผู้รับได้"));
     } finally {
       setLoading(false);
     }
@@ -499,8 +503,9 @@ export default function ManageRecipients() {
   }, [customerId, user]);
 
   const openCreateRecipient = () => {
+    setError("");
     if (!customerId) {
-      alert("กรุณาเลือก customer ก่อน");
+      showErrorToast("กรุณาเลือกเจ้าของงานก่อน");
       return;
     }
 
@@ -510,6 +515,7 @@ export default function ManageRecipients() {
   };
 
   const openEditRecipient = (recipient: Recipient) => {
+    setError("");
     setModalMode("editRecipient");
     setEditingRecipient(recipient);
     setEditingDetail(null);
@@ -525,6 +531,7 @@ export default function ManageRecipients() {
   };
 
   const openCreateDetail = (recipient: Recipient) => {
+    setError("");
     setModalMode("createDetail");
     setEditingRecipient(recipient);
     setEditingDetail(null);
@@ -546,6 +553,7 @@ export default function ManageRecipients() {
   };
 
   const openEditDetail = (recipient: Recipient, detail: RecipientDetail) => {
+    setError("");
     setModalMode("editDetail");
     setEditingRecipient(recipient);
     setEditingDetail(detail);
@@ -570,6 +578,7 @@ export default function ManageRecipients() {
   };
 
   const openDetailStatusModal = (recipient: Recipient, detail: RecipientDetail) => {
+    setError("");
     setSelectedStatus({
       recipient_id: recipient.recipient_id,
       recipient_detail_id: detail.recipient_detail_id,
@@ -581,7 +590,7 @@ export default function ManageRecipients() {
 
   const validateRecipientForm = () => {
     if (!form.recipient_code || !form.recipient_name) {
-      alert("กรุณากรอก recipient_code และ recipient_name");
+      setError("กรุณากรอกรหัสผู้รับและชื่อผู้รับ");
       return false;
     }
 
@@ -590,17 +599,17 @@ export default function ManageRecipients() {
 
   const validateDetailForm = () => {
     if (!form.recipient_detail_name || !form.address || !form.tel1) {
-      alert("กรุณากรอก recipient_detail_name, address และ tel1");
+      setError("กรุณากรอกชื่อสถานที่ ที่อยู่ และเบอร์โทร");
       return false;
     }
 
     if (!/^0\d+$/.test(form.tel1)) {
-      alert("เบอร์โทรต้องขึ้นต้นด้วย 0");
+      setError("เบอร์โทรต้องขึ้นต้นด้วย 0");
       return false;
     }
 
     if (!form.subdistrict_id || !form.district_id || !form.province_id) {
-      alert("กรุณาเลือกตำบล / อำเภอ / จังหวัด จาก dropdown");
+      setError("กรุณาเลือกตำบล / อำเภอ / จังหวัดจากรายการ");
       return false;
     }
 
@@ -608,8 +617,9 @@ export default function ManageRecipients() {
   };
 
   const handleSave = async () => {
+    setError("");
     if (!customerId) {
-      alert("กรุณาเลือก customer ก่อน");
+      setError("กรุณาเลือกเจ้าของงานก่อน");
       return;
     }
 
@@ -628,7 +638,7 @@ export default function ManageRecipients() {
 
       if (modalMode === "editRecipient") {
         if (!editingRecipient) {
-          alert("ไม่พบข้อมูล recipient ที่จะแก้ไข");
+          setError("ไม่พบข้อมูลผู้รับที่จะแก้ไข");
           return;
         }
 
@@ -646,7 +656,7 @@ export default function ManageRecipients() {
 
       if (modalMode === "createDetail") {
         if (!editingRecipient) {
-          alert("ไม่พบข้อมูล recipient ที่จะเพิ่มที่อยู่");
+          setError("ไม่พบข้อมูลผู้รับที่จะเพิ่มที่อยู่");
           return;
         }
 
@@ -670,7 +680,7 @@ export default function ManageRecipients() {
 
       if (modalMode === "editDetail") {
         if (!editingRecipient || !editingDetail) {
-          alert("ไม่พบข้อมูล detail ที่จะแก้ไข");
+          setError("ไม่พบข้อมูลที่อยู่ที่จะแก้ไข");
           return;
         }
 
@@ -701,7 +711,7 @@ export default function ManageRecipients() {
       setExpandedRecipientId(null);
       fetchData(search, paginationModel);
     } catch (err) {
-      alert(getErrorMessage(err, "save recipient failed"));
+      setError(getErrorMessage(err, "ไม่สามารถบันทึกข้อมูลผู้รับได้"));
     }
   };
 
@@ -721,7 +731,7 @@ export default function ManageRecipients() {
       setExpandedRecipientId(null);
       fetchData(search, paginationModel);
     } catch (err) {
-      alert(getErrorMessage(err, "update recipient detail status failed"));
+      setError(getErrorMessage(err, "ไม่สามารถเปลี่ยนสถานะที่อยู่ผู้รับได้"));
     }
   };
 
@@ -750,7 +760,7 @@ export default function ManageRecipients() {
       }));
       setExpandedRecipientId(recipient.recipient_id);
     } catch (err) {
-      alert(getErrorMessage(err, "fetch recipient details failed"));
+      showErrorToast(getErrorMessage(err, "ไม่สามารถโหลดที่อยู่ผู้รับได้"));
     }
   };
 
@@ -956,9 +966,9 @@ export default function ManageRecipients() {
                 setDetailsByRecipientId({});
                 setPaginationModel(firstPage);
               }}
-              placeholder="เลือกผู้รับ"
+              placeholder="เลือกเจ้าของงาน"
               className="lg:!w-[32rem] lg:shrink-0"
-              options={[{ value: "", label: "เลือกผู้รับ" }, ...customers.map((customer: Customer) => ({ value: String(customer.id), label: `${customer.id} ${customer.code} - ${customer.name}` }))]}
+              options={[{ value: "", label: "เลือกเจ้าของงาน" }, ...customers.map((customer: Customer) => ({ value: String(customer.id), label: `${customer.id} ${customer.code} - ${customer.name}` }))]}
             />
 
           <input
@@ -1119,6 +1129,7 @@ export default function ManageRecipients() {
               <X size={18} />
             </button>
             <h3 className="text-lg font-semibold text-slate-800 mb-5">{getModalTitle()}</h3>
+            {error && <div role="alert" className="mb-4 px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm">{error}</div>}
 
             {isDetailMode && editingRecipient && (
               <div className="mb-4 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-600">
@@ -1251,7 +1262,7 @@ export default function ManageRecipients() {
         </div>
       )}
 
-      <StatusModal open={statusModal} current={selectedStatus?.current ?? null} onClose={closeStatusModal} onChange={(status) => void changeStatus(status === "ACTIVE" ? "ACTIVE" : "INACTIVE")} />
+      <StatusModal open={statusModal} error={error} current={selectedStatus?.current ?? null} onClose={closeStatusModal} onChange={(status) => void changeStatus(status === "ACTIVE" ? "ACTIVE" : "INACTIVE")} />
     </div>
   );
 }

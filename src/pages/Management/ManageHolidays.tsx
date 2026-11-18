@@ -81,6 +81,7 @@ const getErrorMessage = (err: unknown, fallback: string) => {
 };
 
 export default function ManageHolidays() {
+  const [error, setError] = useState("");
   const [rows, setRows] = useState<Holiday[]>([]);
   const [form, setForm] = useState<HolidayForm>(emptyForm);
   const [editing, setEditing] = useState<Holiday | null>(null);
@@ -126,7 +127,7 @@ export default function ManageHolidays() {
 
       setRows(data);
     } catch (err) {
-      alert(getErrorMessage(err, "fetch holidays failed"));
+      setError(getErrorMessage(err, "fetch holidays failed"));
     } finally {
       setLoading(false);
     }
@@ -139,18 +140,19 @@ export default function ManageHolidays() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError("");
 
     const holidayDate = form.holiday_date;
     const holidayName = form.holiday_name.trim();
     const remark = form.remark.trim();
 
     if (!holidayDate) {
-      alert("กรุณาเลือกวันที่");
+      setError("กรุณาเลือกวันที่");
       return;
     }
 
     if (!holidayName) {
-      alert("กรุณากรอกชื่อวันหยุด");
+      setError("กรุณากรอกชื่อวันหยุด");
       return;
     }
 
@@ -173,7 +175,7 @@ export default function ManageHolidays() {
       resetForm();
       fetchData();
     } catch (err) {
-      alert(getErrorMessage(err, "save holiday failed"));
+      setError(getErrorMessage(err, "save holiday failed"));
     } finally {
       setSaving(false);
     }
@@ -415,6 +417,8 @@ export default function ManageHolidays() {
             </button>
           )}
         </div>
+
+        {error && <div role="alert" className="mb-4 px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm">{error}</div>}
 
         <div className="grid grid-cols-1 gap-3 xl:grid-cols-[170px_minmax(280px,1fr)_minmax(280px,1fr)_100px] xl:items-end">
           <div>

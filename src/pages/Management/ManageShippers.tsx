@@ -1,6 +1,7 @@
 import Select from "../../components/tms/form/Select";
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type ReactNode } from "react";
 import StatusModal from "../../components/tms/modal/StatusModal";
+import { showErrorToast } from "../../utils/toast";
 import SearchableSelect from "../../components/tms/form/SearchableSelect";
 import AxiosInstance from "../../services/apiClient";
 import { useAuth } from "../../context/AuthContext";
@@ -61,6 +62,7 @@ const getErrorMessage = (err: unknown, fallback: string) => {
 };
 
 export default function ManageShippers() {
+  const [error, setError] = useState("");
   const { user } = useAuth();
 
 
@@ -128,6 +130,7 @@ export default function ManageShippers() {
   };
 
   const closeModal = () => {
+    setError("");
     setShowModal(false);
     resetForm();
   };
@@ -144,6 +147,7 @@ export default function ManageShippers() {
   };
 
   const closeROModal = () => {
+    setError("");
     setRoModal(false);
     setSelectedShipper(null);
     setRoRows([]);
@@ -186,7 +190,7 @@ export default function ManageShippers() {
 
       setCustomers(data);
     } catch (err) {
-      alert(getErrorMessage(err, "fetch customers failed"));
+      showErrorToast(getErrorMessage(err, "ไม่สามารถโหลดข้อมูลเจ้าของงานได้"));
     }
   };
 
@@ -204,7 +208,7 @@ export default function ManageShippers() {
 
       setRows(res.data || []);
     } catch (err) {
-      alert(getErrorMessage(err, "fetch shippers failed"));
+      showErrorToast(getErrorMessage(err, "ไม่สามารถโหลดข้อมูลผู้ส่งได้"));
     } finally {
       setLoading(false);
     }
@@ -220,7 +224,7 @@ export default function ManageShippers() {
 
       setRoRows(res.data || []);
     } catch (err) {
-      alert(getErrorMessage(err, "fetch ro documents failed"));
+      setError(getErrorMessage(err, "ไม่สามารถโหลดเอกสารรับกลับได้"));
       setRoRows([]);
     } finally {
       setRoLoading(false);
@@ -243,8 +247,9 @@ export default function ManageShippers() {
   }, [customerId]);
 
   const openCreate = () => {
+    setError("");
     if (!customerId) {
-      alert("กรุณาเลือก customer ก่อน");
+      showErrorToast("กรุณาเลือกเจ้าของงานก่อน");
       return;
     }
 
@@ -253,6 +258,7 @@ export default function ManageShippers() {
   };
 
   const openEdit = (row: ShipperRow) => {
+    setError("");
     setEditing(row);
 
     setForm({
@@ -278,8 +284,9 @@ export default function ManageShippers() {
   };
 
   const openROModal = (row: ShipperRow) => {
+    setError("");
     if (!customerId) {
-      alert("กรุณาเลือก customer ก่อน");
+      showErrorToast("กรุณาเลือกเจ้าของงานก่อน");
       return;
     }
 
@@ -294,7 +301,7 @@ export default function ManageShippers() {
     const files = Array.from(e.currentTarget.files || []);
 
     if (files.length > 5) {
-      alert("อัปโหลดรูปได้สูงสุด 5 รูป");
+      setError("อัปโหลดรูปได้สูงสุด 5 รูป");
       e.currentTarget.value = "";
       setRoImages([]);
       return;
@@ -304,7 +311,7 @@ export default function ManageShippers() {
       const oldCount = roEditing.images?.length || 0;
 
       if (oldCount + files.length > 5) {
-        alert(`RO นี้มีรูปเดิม ${oldCount} รูป เพิ่มได้อีกไม่เกิน ${5 - oldCount} รูป`);
+        setError(`RO นี้มีรูปเดิม ${oldCount} รูป เพิ่มได้อีกไม่เกิน ${5 - oldCount} รูป`);
         e.currentTarget.value = "";
         setRoImages([]);
         return;
@@ -343,13 +350,14 @@ export default function ManageShippers() {
   };
 
   const handleSaveRO = async () => {
+    setError("");
     if (!customerId) {
-      alert("กรุณาเลือก customer ก่อน");
+      setError("กรุณาเลือกเจ้าของงานก่อน");
       return;
     }
 
     if (!selectedShipper?.shipper_id) {
-      alert("ไม่พบข้อมูลผู้ส่ง");
+      setError("ไม่พบข้อมูลผู้ส่ง");
       return;
     }
 
@@ -357,22 +365,22 @@ export default function ManageShippers() {
     const cleanROName = roName.trim();
 
     if (!cleanROCode) {
-      alert("กรุณากรอก RO Code");
+      setError("กรุณากรอกรหัสเอกสารรับกลับ");
       return;
     }
 
     if (!cleanROName) {
-      alert("กรุณากรอกชื่อ RO");
+      setError("กรุณากรอกชื่อเอกสารรับกลับ");
       return;
     }
 
     if (!roEditing && roImages.length === 0) {
-      alert("กรุณาเลือกรูปเอกสารรับกลับอย่างน้อย 1 รูป");
+      setError("กรุณาเลือกรูปเอกสารรับกลับอย่างน้อย 1 รูป");
       return;
     }
 
     if (roImages.length > 5) {
-      alert("อัปโหลดรูปได้สูงสุด 5 รูป");
+      setError("อัปโหลดรูปได้สูงสุด 5 รูป");
       return;
     }
 
@@ -410,7 +418,7 @@ export default function ManageShippers() {
       resetROForm();
       await fetchRODocuments(selectedShipper.shipper_id);
     } catch (err) {
-      alert(getErrorMessage(err, "save ro failed"));
+      setError(getErrorMessage(err, "ไม่สามารถบันทึกเอกสารรับกลับได้"));
     } finally {
       setRoSaving(false);
     }
@@ -448,15 +456,16 @@ export default function ManageShippers() {
 
       alert("ลบ RO สำเร็จ");
     } catch (err) {
-      alert(getErrorMessage(err, "delete ro failed"));
+      setError(getErrorMessage(err, "ไม่สามารถลบเอกสารรับกลับได้"));
     } finally {
       setDeletingRO(false);
     }
   };
 
   const handleSave = async () => {
+    setError("");
     if (!customerId) {
-      alert("กรุณาเลือก customer ก่อน");
+      setError("กรุณาเลือกเจ้าของงานก่อน");
       return;
     }
 
@@ -466,17 +475,17 @@ export default function ManageShippers() {
     const fax = cleanNumberInput(form.fax);
 
     if (tel && !tel.startsWith("0")) {
-      alert("เบอร์โทรต้องขึ้นต้นด้วย 0");
+      setError("เบอร์โทรต้องขึ้นต้นด้วย 0");
       return;
     }
 
     if (!shipper_code || !shipper_name) {
-      alert("กรุณากรอก shipper code และ shipper name");
+      setError("กรุณากรอกรหัสผู้ส่งและชื่อผู้ส่ง");
       return;
     }
 
     if (!form.subdistrict_id || !form.district_id || !form.province_id) {
-      alert("กรุณาเลือกตำบล / อำเภอ / จังหวัด จาก dropdown");
+      setError("กรุณาเลือกตำบล / อำเภอ / จังหวัดจากรายการ");
       return;
     }
 
@@ -506,11 +515,12 @@ export default function ManageShippers() {
       resetForm();
       fetchData();
     } catch (err) {
-      alert(getErrorMessage(err, "save shipper failed"));
+      setError(getErrorMessage(err, "ไม่สามารถบันทึกข้อมูลผู้ส่งได้"));
     }
   };
 
   const openStatusModal = (row: ShipperRow) => {
+    setError("");
     setSelectedStatus({
       shipper_id: row.shipper_id,
       current: row.is_deleted === "N" ? "ACTIVE" : "INACTIVE",
@@ -531,7 +541,7 @@ export default function ManageShippers() {
       setSelectedStatus(null);
       fetchData();
     } catch (err) {
-      alert(getErrorMessage(err, "update status failed"));
+      setError(getErrorMessage(err, "ไม่สามารถเปลี่ยนสถานะผู้ส่งได้"));
     }
   };
 
@@ -816,7 +826,7 @@ export default function ManageShippers() {
       </div>
 
       <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-2 flex gap-3 flex-wrap shrink-0">
-          <SearchableSelect value={customerId} onChange={setCustomerId} placeholder="เลือกผู้ส่ง" className="!w-full sm:!w-[32rem]" options={[{ value: "", label: "เลือกผู้ส่ง" }, ...customers.map((c) => ({ value: String(c.id), label: `${c.id} ${c.code} - ${c.name}` }))]} />
+          <SearchableSelect value={customerId} onChange={setCustomerId} placeholder="เลือกเจ้าของงาน" className="!w-full sm:!w-[32rem]" options={[{ value: "", label: "เลือกเจ้าของงาน" }, ...customers.map((c) => ({ value: String(c.id), label: `${c.id} ${c.code} - ${c.name}` }))]} />
 
         <input
           placeholder="ค้นหา Code / ชื่อผู้ส่ง / เบอร์โทร"
@@ -856,6 +866,7 @@ export default function ManageShippers() {
               <X size={18} />
             </button>
             <h3 className="text-lg font-semibold text-slate-800 mb-5">{editing ? "แก้ไขผู้ส่ง" : "เพิ่มผู้ส่ง"}</h3>
+            {error && <div role="alert" className="mb-4 px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm">{error}</div>}
 
             <div className="space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -972,6 +983,7 @@ export default function ManageShippers() {
                 <X size={16} />
               </button>
             </div>
+            {!deleteROTarget && error && <div role="alert" className="mb-4 px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm">{error}</div>}
             <div className="rounded-xl border border-slate-200 p-2.5 bg-slate-50 mb-3">
               <div className="flex items-center justify-between gap-3 mb-2">
                 <h4 className="font-medium text-slate-700 text-sm">{roEditing ? "แก้ไขเอกสารรับกลับ" : "เพิ่มเอกสารรับกลับ"}</h4>
@@ -1094,8 +1106,8 @@ export default function ManageShippers() {
         </div>
       )}
 
-      <StatusModal open={statusModal} current={selectedStatus?.current ?? null} onClose={() => { setStatusModal(false); setSelectedStatus(null); }} onChange={(status) => void changeStatus(status === "ACTIVE" ? "ACTIVE" : "INACTIVE")} />
-      <ConfirmModal open={Boolean(deleteROTarget)} title="ยืนยันลบ RO" description={<>ต้องการลบ RO <strong className="text-slate-800">{deleteROTarget?.ro_code || "-"}</strong> ใช่ไหม?</>} confirmLabel="ลบ" loadingLabel="กำลังลบ..." loading={deletingRO} danger onClose={() => setDeleteROTarget(null)} onConfirm={() => void handleDeleteRO()} />
+      <StatusModal open={statusModal} error={error} current={selectedStatus?.current ?? null} onClose={() => { setError(""); setStatusModal(false); setSelectedStatus(null); }} onChange={(status) => void changeStatus(status === "ACTIVE" ? "ACTIVE" : "INACTIVE")} />
+      <ConfirmModal open={Boolean(deleteROTarget)} error={error} title="ยืนยันลบ RO" description={<>ต้องการลบ RO <strong className="text-slate-800">{deleteROTarget?.ro_code || "-"}</strong> ใช่ไหม?</>} confirmLabel="ลบ" loadingLabel="กำลังลบ..." loading={deletingRO} danger onClose={() => { setError(""); setDeleteROTarget(null); }} onConfirm={() => void handleDeleteRO()} />
     </div>
   );
 }
