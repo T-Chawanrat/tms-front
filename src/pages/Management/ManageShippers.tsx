@@ -1,3 +1,4 @@
+import FormError from "../../components/tms/form/FormError";
 import Select from "../../components/tms/form/Select";
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type ReactNode } from "react";
 import StatusModal from "../../components/tms/modal/StatusModal";
@@ -866,7 +867,7 @@ export default function ManageShippers() {
               <X size={18} />
             </button>
             <h3 className="text-lg font-semibold text-slate-800 mb-5">{editing ? "แก้ไขผู้ส่ง" : "เพิ่มผู้ส่ง"}</h3>
-            {error && <div role="alert" className="mb-4 px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm">{error}</div>}
+            <FormError message={error} className="mb-4" />
 
             <div className="space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -983,7 +984,7 @@ export default function ManageShippers() {
                 <X size={16} />
               </button>
             </div>
-            {!deleteROTarget && error && <div role="alert" className="mb-4 px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm">{error}</div>}
+            {!deleteROTarget && <FormError message={error} className="mb-4" />}
             <div className="rounded-xl border border-slate-200 p-2.5 bg-slate-50 mb-3">
               <div className="flex items-center justify-between gap-3 mb-2">
                 <h4 className="font-medium text-slate-700 text-sm">{roEditing ? "แก้ไขเอกสารรับกลับ" : "เพิ่มเอกสารรับกลับ"}</h4>

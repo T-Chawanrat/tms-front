@@ -1,3 +1,4 @@
+import FormError from "../../components/tms/form/FormError";
 import { useEffect, useMemo, useState } from "react";
 import StatusModal from "../../components/tms/modal/StatusModal";
 import { showErrorToast } from "../../utils/toast";
@@ -703,7 +704,7 @@ export default function ManagePackages() {
               <X size={18} />
             </button>
             <h3 className="text-lg font-semibold text-slate-800 mb-5">{editing ? "แก้ไข Package" : "เพิ่ม Package"}</h3>
-            {error && <div role="alert" className="mb-4 px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm">{error}</div>}
+            <FormError message={error} className="mb-4" />
 
             <div className="space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -797,7 +798,7 @@ export default function ManagePackages() {
             </div>
 
             <div className="flex-1 min-h-0 overflow-hidden">
-              {!showDetailFormModal && !statusModal && error && <div role="alert" className="mb-4 px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm">{error}</div>}
+              {!showDetailFormModal && !statusModal && <FormError message={error} className="mb-4" />}
               <DataGrid
                 rows={detailGridRows}
                 columns={detailColumns}
@@ -829,7 +830,7 @@ export default function ManagePackages() {
             </button>
             <h3 className="text-lg font-semibold text-slate-800 mb-1">{editingDetail ? "แก้ไขราคา" : "เพิ่มราคา"}</h3>
             <p className="text-sm text-slate-500 mb-5">ประเภท: {selectedPackageType || "-"}</p>
-            {error && <div role="alert" className="mb-4 px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm">{error}</div>}
+            <FormError message={error} className="mb-4" />
 
             <div className="space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

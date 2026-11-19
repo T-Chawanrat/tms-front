@@ -1,3 +1,4 @@
+import FormError from "../../components/tms/form/FormError";
 import Select from "../../components/tms/form/Select";
 import { useEffect, useMemo, useState } from "react";
 import StatusModal from "../../components/tms/modal/StatusModal";
@@ -530,7 +531,7 @@ export default function ManageCustomers() {
               <X size={18} />
             </button>
             <h3 className="text-lg font-semibold text-slate-800 mb-5">{editingCustomer ? "แก้ไขลูกค้า" : "เพิ่มลูกค้า"}</h3>
-            {error && <div role="alert" className="mb-4 px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm">{error}</div>}
+            <FormError message={error} className="mb-4" />
 
             <div className="space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -660,7 +661,7 @@ export default function ManageCustomers() {
               <X size={18} />
             </button>
             <h3 className="text-lg font-semibold text-slate-800 mb-5">เพิ่ม User ให้ {selectedCustomer?.name}</h3>
-            {error && <div role="alert" className="mb-4 px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm">{error}</div>}
+            <FormError message={error} className="mb-4" />
 
             <div className="space-y-3">
               <div>

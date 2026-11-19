@@ -1,3 +1,4 @@
+import FormError from "../../components/tms/form/FormError";
 import Select from "../../components/tms/form/Select";
 import { useEffect, useMemo, useState } from "react";
 import StatusModal from "../../components/tms/modal/StatusModal";
@@ -620,7 +621,7 @@ export default function ManageVehicles() {
               </button>
               <h3 className="text-lg font-semibold text-slate-800 mb-5">{editing ? "แก้ไขรถ" : "เพิ่มรถ"}</h3>
 
-              {error && <div className="mb-4 px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm">{error}</div>}
+              <FormError message={error} className="mb-4" />
 
               <div className="space-y-5">
                 <div>

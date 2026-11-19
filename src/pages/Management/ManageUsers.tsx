@@ -1,3 +1,4 @@
+import FormError from "../../components/tms/form/FormError";
 import { useState, useEffect, useMemo } from "react";
 import StatusModal from "../../components/tms/modal/StatusModal";
 import SearchableSelect from "../../components/tms/form/SearchableSelect";
@@ -662,7 +663,7 @@ export default function ManageUsers() {
               </button>
               <h3 className="text-lg font-semibold text-slate-800 mb-5">เพิ่มผู้ใช้</h3>
 
-              {error && <div className="mb-4 px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm">{error}</div>}
+              <FormError message={error} className="mb-4" />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>

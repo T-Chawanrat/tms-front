@@ -5,6 +5,7 @@ import TablePagination from "@mui/material/TablePagination";
 import { X } from "lucide-react";
 import AxiosInstance from "../../services/apiClient";
 import Select from "../../components/tms/form/Select";
+import FormError from "../../components/tms/form/FormError";
 import { calculatePackageRate, isWeightFix, moneyValue, toNum } from "../../utils/packageRate";
 import { inputClass } from "./createReceiveConfig";
 import type {
@@ -896,7 +897,7 @@ export default function ReceiveModals({
             </div>
 
             <div className="space-y-3">
-              {packageError && <div className="rounded border border-red-200 bg-red-50 px-2 py-1.5 text-xs text-red-700">{packageError}</div>}
+              <FormError message={packageError} variant="compact" />
 
               <div className="rounded-md border border-slate-200 bg-white p-2.5">
                 <div className="space-y-2">
@@ -1142,7 +1143,7 @@ export default function ReceiveModals({
               />
             </div>
 
-            {packageError && <div className="mb-2 rounded border border-red-200 bg-red-50 px-2 py-1.5 text-xs text-red-700">{packageError}</div>}
+            <FormError message={packageError} variant="compact" className="mb-2" />
 
             <div className="max-h-[560px] overflow-y-auto border border-slate-300">
               <table className="w-full border-collapse text-[13px]">

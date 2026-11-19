@@ -1,3 +1,5 @@
+import FormError from "../form/FormError";
+
 type Status = "ACTIVE" | "INACTIVE" | "MAINTENANCE";
 
 type Props = {
@@ -23,7 +25,7 @@ export default function StatusModal({ open, current, loading = false, error, sho
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 p-4 font-thai" onClick={onClose}>
       <div role="dialog" aria-modal="true" aria-label="สถานะ" className="w-full max-w-[300px] animate-scaleIn rounded-2xl bg-white p-6 shadow-xl" onClick={(event) => event.stopPropagation()}>
         <h3 className="mb-4 text-lg font-semibold text-slate-800">สถานะ</h3>
-        {error && <div role="alert" className="mb-4 px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm">{error}</div>}
+        <FormError message={error} className="mb-4" />
         <div className="flex flex-col gap-3">
           {options.map((option) => (
             <button key={option.value} type="button" disabled={loading || current === option.value} onClick={() => onChange(option.value)} className={`rounded-lg px-4 py-2 ${current === option.value ? `cursor-not-allowed ${option.selectedColor}` : option.color} ${loading ? "opacity-60" : ""}`}>

@@ -1,3 +1,4 @@
+import FormError from "../../components/tms/form/FormError";
 import Select from "../../components/tms/form/Select";
 // client/src/pages/ManageHolidays.tsx
 import StatusModal from "../../components/tms/modal/StatusModal";
@@ -418,7 +419,7 @@ export default function ManageHolidays() {
           )}
         </div>
 
-        {error && <div role="alert" className="mb-4 px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm">{error}</div>}
+        <FormError message={error} className="mb-4" />
 
         <div className="grid grid-cols-1 gap-3 xl:grid-cols-[170px_minmax(280px,1fr)_minmax(280px,1fr)_100px] xl:items-end">
           <div>

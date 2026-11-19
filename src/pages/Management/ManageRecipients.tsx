@@ -1,3 +1,4 @@
+import FormError from "../../components/tms/form/FormError";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import StatusModal from "../../components/tms/modal/StatusModal";
 import { showErrorToast } from "../../utils/toast";
@@ -1129,7 +1130,7 @@ export default function ManageRecipients() {
               <X size={18} />
             </button>
             <h3 className="text-lg font-semibold text-slate-800 mb-5">{getModalTitle()}</h3>
-            {error && <div role="alert" className="mb-4 px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm">{error}</div>}
+            <FormError message={error} className="mb-4" />
 
             {isDetailMode && editingRecipient && (
               <div className="mb-4 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-600">

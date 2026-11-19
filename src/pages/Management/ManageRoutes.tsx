@@ -1,3 +1,4 @@
+import FormError from "../../components/tms/form/FormError";
 import Select from "../../components/tms/form/Select";
 import { useEffect, useMemo, useState } from "react";
 import StatusModal from "../../components/tms/modal/StatusModal";
@@ -504,7 +505,7 @@ export default function ManageRoutes() {
               </button>
             </div>
             <div className="grid gap-4 p-5 sm:grid-cols-2">
-              {routeFormError && <div role="alert" className="sm:col-span-2 px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm">{routeFormError}</div>}
+              <FormError message={routeFormError} className="sm:col-span-2" />
               <div className="sm:col-span-2">
                 <label className="mb-1.5 block text-sm font-medium text-slate-700">คลัง</label>
                 <Select value={String(selectedWarehouseId)} onChange={(next) => setSelectedWarehouseId(next)} placeholder="เลือกคลัง" options={warehouses.map((warehouse) => ({ value: String(warehouse.id), label: warehouse.name }))} />
@@ -569,7 +570,7 @@ export default function ManageRoutes() {
               </button>
             </div>
             <div className="space-y-5 p-5">
-              {detailFormError && <div role="alert" className="px-4 py-2 rounded-xl bg-red-50 text-red-600 text-sm">{detailFormError}</div>}
+              <FormError message={detailFormError} />
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-slate-700">ตำบล / อำเภอ / จังหวัด</label>
                 <AddressSearchDropdown
