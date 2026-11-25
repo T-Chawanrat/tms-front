@@ -24,6 +24,8 @@ const paths: Record<string, string> = {
   "/truck-scan/:truckLoadId": "TRUCK_LOAD",
   "/truck-print/:truckLoadId": "TRUCK_LOAD",
   "/delivery-truck-create": "TRUCK_DELIVERY",
+  "/pickup-trucks": "TRUCK_DELIVERY",
+  "/pickup-trucks/:truckId": "TRUCK_DELIVERY",
   "/delivery-truck-scan/:truckLoadId": "TRUCK_DELIVERY",
   "/delivery-truck-print/:truckLoadId": "TRUCK_DELIVERY",
   "/dc-receive": "DC_RECEIVE",
@@ -53,4 +55,12 @@ const paths: Record<string, string> = {
 
 export function permissionForPath(pathname: string): string | undefined {
   return Object.entries(paths).find(([path]) => matchPath({ path, end: true }, pathname))?.[1];
+}
+
+export function canAccessPath(pathname: string, permissions: string[]): boolean {
+  if (pathname === "/dc-receive") {
+    return ["DC_RECEIVE", "WAREHOUSE_RECEIVE", "PICKUP_RECEIVE"].some((permission) => permissions.includes(permission));
+  }
+  const permission = permissionForPath(pathname);
+  return !permission || permissions.includes(permission);
 }

@@ -4,7 +4,7 @@ import { ChartNoAxesCombined, CircleHelp, ClipboardList, Database, File, History
 import { ChevronDownIcon, HorizontaLDots } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import { useAuth } from "../context/AuthContext";
-import { permissionForPath } from "../routes/permissions";
+import { canAccessPath, permissionForPath } from "../routes/permissions";
 
 type NavItem = {
   name: string;
@@ -60,10 +60,10 @@ const navItems: NavItem[] = [
     icon: <Warehouse />,
     name: "คลังสินค้าและขนส่ง",
     subItems: [
-      { name: "ยิงรับเข้าคลังต้นทาง", path: "/wh-receive", icon: <File size={20} /> },
+      { name: "ยิงรับเข้าคลัง", path: "/dc-receive", icon: <File size={20} /> },
       { name: "ใบรถขนย้าย", path: "/truck-create", icon: <File size={20} /> },
-      { name: "ยิงรับเข้าคลังปลายทาง", path: "/dc-receive", icon: <File size={20} /> },
       { name: "ใบรถกระจายสินค้า", path: "/delivery-truck-create", icon: <File size={20} /> },
+      { name: "ใบรถเข้ารับ", path: "/pickup-trucks", icon: <File size={20} /> },
     ],
   },
   {
@@ -112,7 +112,7 @@ const AppSidebar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, user, permissions, isSuperAdmin } = useAuth();
-  const canSee = (path: string) => supportPaths.has(path) || isSuperAdmin || Boolean(permissionForPath(path) && permissions.includes(permissionForPath(path)!));
+  const canSee = (path: string) => supportPaths.has(path) || isSuperAdmin || Boolean(permissionForPath(path) && canAccessPath(path, permissions));
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";

@@ -9,6 +9,7 @@ import React, {
 
 import AxiosInstance, { setTokenExpiredHandler } from "../services/apiClient";
 import TokenExpiredModal from "../components/tms/modal/TokenExpiredModal";
+import { connectSocket } from "../services/socket";
 
 export interface UserType {
   id: number;
@@ -103,6 +104,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   useEffect(() => {
     let active = true;
+    let requestVersion = 0;
     setPermissions([]);
     setIsSuperAdmin(false);
     setPermissionsError(false);
@@ -111,11 +113,33 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       return;
     }
     setPermissionsLoading(true);
-    AxiosInstance.get<{ permissions: string[]; is_super_admin: boolean }>("/manage/permissions/me")
-      .then(({ data }) => { if (active) { setPermissions(data.permissions); setIsSuperAdmin(data.is_super_admin); } })
-      .catch(() => { if (active) setPermissionsError(true); })
-      .finally(() => { if (active) setPermissionsLoading(false); });
-    return () => { active = false; };
+    const refreshPermissions = () => {
+      const version = ++requestVersion;
+      AxiosInstance.get<{ permissions: string[]; is_super_admin: boolean }>("/manage/permissions/me")
+        .then(({ data }) => {
+          if (active && version === requestVersion) {
+            setPermissions(data.permissions);
+            setIsSuperAdmin(data.is_super_admin);
+            setPermissionsError(false);
+          }
+        })
+        .catch(() => {
+          if (active && version === requestVersion) setPermissionsError(true);
+        })
+        .finally(() => {
+          if (active && version === requestVersion) setPermissionsLoading(false);
+        });
+    };
+    refreshPermissions();
+    const socket = connectSocket();
+    socket.on("permissions:updated", refreshPermissions);
+    socket.on("connect", refreshPermissions);
+    return () => {
+      active = false;
+      socket.off("permissions:updated", refreshPermissions);
+      socket.off("connect", refreshPermissions);
+      socket.disconnect();
+    };
   }, [isLoggedIn, user?.id]);
 
   const clearAuthData = useCallback(() => {

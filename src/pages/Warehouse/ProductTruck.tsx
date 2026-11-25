@@ -56,12 +56,13 @@ type AxiosLikeError = {
   message?: string;
 };
 
-type TruckScope = "INBOUND" | "TRANSFER" | "DELIVERY";
+type TruckScope = "INBOUND" | "TRANSFER" | "DELIVERY" | "PICKUP";
 
 const truckScopeTabs: { value: TruckScope; label: string }[] = [
   { value: "INBOUND", label: "รถขนย้ายขาเข้า" },
   { value: "TRANSFER", label: "รถขนย้ายขาออก" },
   { value: "DELIVERY", label: "รถกระจาย" },
+  { value: "PICKUP", label: "รถรับจากลูกค้า" },
 ];
 
 const getErrorMessage = (error: unknown) => {
@@ -94,8 +95,8 @@ export default function ProductTruck() {
   const requestedSearch = searchTerm.length >= 3 ? searchTerm : "";
   const searchPending = requestedSearch !== debouncedSearch;
   const showRoute = truckScope === "DELIVERY";
-  const showTruckCode = truckScope === "INBOUND";
-  const showDestinationWarehouse = truckScope !== "DELIVERY";
+  const showTruckCode = truckScope === "INBOUND" || truckScope === "PICKUP";
+  const showDestinationWarehouse = truckScope !== "DELIVERY" && truckScope !== "PICKUP";
   const tableHeaders = useMemo(
     () => [
       "#",
@@ -219,7 +220,7 @@ export default function ProductTruck() {
             <Truck size={18} className="text-blue-600" />
             สินค้าบนรถ
           </h1>
-          <p className="mt-0.5 text-[11px] text-slate-500">ตรวจสอบ Serial No ที่อยู่ในรถขนย้ายและรถกระจาย</p>
+          <p className="mt-0.5 text-[11px] text-slate-500">ตรวจสอบ Serial No ที่อยู่บนรถ</p>
         </div>
 
         <div className="flex items-center gap-2">

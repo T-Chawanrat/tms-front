@@ -49,7 +49,7 @@ export default function ManagePermissions() {
       return;
     }
     Promise.all([
-      AxiosInstance.get<Permission[]>("/manage/permissions"),
+      AxiosInstance.post("/manage/permissions/initialize").then(() => AxiosInstance.get<Permission[]>("/manage/permissions")),
       AxiosInstance.get<{ user: User; role_permission_ids: number[]; overrides: Override[] }>(`/manage/permissions/users/${userId}`),
     ])
       .then(([permissionsResponse, userResponse]) => {

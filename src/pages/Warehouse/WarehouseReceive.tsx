@@ -24,7 +24,7 @@ type WarehouseReceiveResponse = {
   total: number;
 };
 
-export default function WarehouseScan() {
+export default function WarehouseReceive({ embedded = false }: { embedded?: boolean }) {
   const receiveInputRef = useRef<HTMLInputElement | null>(null);
   const removeInputRef = useRef<HTMLInputElement | null>(null);
   const successAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -242,7 +242,7 @@ export default function WarehouseScan() {
 
   return (
     <div
-      className={`flex h-[calc(100vh-61px)] w-full flex-col overflow-hidden bg-slate-50 px-1 py-2 text-slate-800 ${
+      className={`flex ${embedded ? "h-full" : "h-[calc(100vh-61px)]"} w-full flex-col overflow-hidden bg-slate-50 px-1 py-2 text-slate-800 ${
         loading || saving ? "cursor-wait" : ""
       }`}
     >

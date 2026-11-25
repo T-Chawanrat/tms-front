@@ -17,7 +17,7 @@ export const permissionGroups = [
     ],
   },
   { name: "จัดการบิล", codes: ["CREATE_RECEIVE", "IMPORT_RECEIVE", "RECEIVE_REPORT", "LABEL_PRINT", "DELIVERY_CLOSE", "DELIVERY_ISSUES"] },
-  { name: "คลังสินค้าและขนส่ง", codes: ["WAREHOUSE_RECEIVE", "DC_RECEIVE", "PRODUCT_WAREHOUSE", "PRODUCT_TRUCK", "TRUCK_LOAD", "TRUCK_DELIVERY"] },
+  { name: "คลังสินค้าและขนส่ง", codes: ["WAREHOUSE_RECEIVE", "DC_RECEIVE", "PICKUP_RECEIVE", "PRODUCT_WAREHOUSE", "PRODUCT_TRUCK", "TRUCK_LOAD", "TRUCK_DELIVERY"] },
   { name: "รายงาน", codes: ["PENDING_REPORT_RECEIVE", "PENDING_REPORT_SN", "PENDING_REPORT_DT"] },
   {
     name: "Logs",

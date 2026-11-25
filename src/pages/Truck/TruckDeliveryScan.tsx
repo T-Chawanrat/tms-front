@@ -372,7 +372,7 @@ export default function TruckDeliveryScan() {
       <section className="mb-3 shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2.5 shadow-sm">
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4 xl:items-end">
           <div className="min-w-0">
-            <label className="mb-1 block text-xs font-medium text-slate-600">Now Warehouse</label>
+            <label className="mb-1 block text-xs font-medium text-slate-600">คลังปัจจุบัน</label>
             <input
               value={truck?.warehouse_name || ""}
               readOnly
@@ -380,7 +380,7 @@ export default function TruckDeliveryScan() {
             />
           </div>
           <div className="min-w-0">
-            <label className="mb-1 block text-xs font-medium text-slate-600">Driver</label>
+            <label className="mb-1 block text-xs font-medium text-slate-600">คนขับ</label>
             <input
               value={[truck?.employee_code, truck?.driver_name].filter(Boolean).join(" - ")}
               readOnly
@@ -388,7 +388,7 @@ export default function TruckDeliveryScan() {
             />
           </div>
           <div className="min-w-0">
-            <label className="mb-1 block text-xs font-medium text-slate-600">Vehicle</label>
+            <label className="mb-1 block text-xs font-medium text-slate-600">รถ</label>
             <input
               value={[truck?.license_plate, truck?.license_plate_province, truck?.model].filter(Boolean).join(" - ")}
               readOnly
@@ -396,7 +396,7 @@ export default function TruckDeliveryScan() {
             />
           </div>
           <div className="min-w-0">
-            <label className="mb-1 block text-xs font-medium text-slate-600">Route</label>
+            <label className="mb-1 block text-xs font-medium text-slate-600">สายรถ</label>
             <input
               value={[truck?.route_code, truck?.route_name].filter(Boolean).join(" - ")}
               readOnly

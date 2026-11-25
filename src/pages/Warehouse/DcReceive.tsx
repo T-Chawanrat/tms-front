@@ -27,7 +27,7 @@ type DcReceiveResponse = {
   draft?: DcReceiveRow[];
 };
 
-export default function DcReceive() {
+export default function DcReceive({ embedded = false }: { embedded?: boolean }) {
   const receiveInputRef = useRef<HTMLInputElement>(null);
   const removeInputRef = useRef<HTMLInputElement>(null);
   const successAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -237,7 +237,7 @@ export default function DcReceive() {
   );
 
   return (
-    <div className="flex h-[calc(100vh-61px)] flex-col overflow-hidden bg-slate-50 px-1 py-2 text-slate-800">
+    <div className={`flex ${embedded ? "h-full" : "h-[calc(100vh-61px)]"} flex-col overflow-hidden bg-slate-50 px-1 py-2 text-slate-800`}>
       <div className="mb-3 flex items-end justify-between gap-4">
         <div>
           <h1 className="text-lg font-bold text-slate-900">รับสินค้าเข้าคลัง DC</h1>

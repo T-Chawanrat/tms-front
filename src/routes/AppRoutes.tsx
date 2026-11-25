@@ -8,7 +8,7 @@ import UserProfiles from "../pages/AuthPages/UserProfiles";
 const Announcements = lazy(() => import("../pages/Dashboard/Announcements"));
 const ContractorCreate = lazy(() => import("../pages/Management/ContractorCreate"));
 const CreateReceivePage = lazy(() => import("../pages/CreateReceivePage/CreateReceivePage"));
-const DcReceive = lazy(() => import("../pages/Warehouse/DcReceive"));
+const ReceiveTab = lazy(() => import("../pages/Warehouse/ReceiveTab"));
 const DeliveryClose = lazy(() => import("../pages/Delivery/DeliveryClose"));
 const DeliveryCloseMediaEdit = lazy(() => import("../pages/Delivery/DeliveryCloseMediaEdit"));
 const IssueInbox = lazy(() => import("../pages/Delivery/IssueInbox"));
@@ -51,10 +51,11 @@ const SignIn = lazy(() => import("../pages/AuthPages/SignIn"));
 const TruckDeliveryCreate = lazy(() => import("../pages/Truck/TruckDeliveryCreate"));
 const TruckDeliveryPrint = lazy(() => import("../pages/Truck/TruckDeliveryPrint"));
 const TruckDeliveryScan = lazy(() => import("../pages/Truck/TruckDeliveryScan"));
+const TruckPickup = lazy(() => import("../pages/Truck/TruckPickup"));
+const TruckPickupScan = lazy(() => import("../pages/Truck/TruckPickupScan"));
 const TruckLoadCreate = lazy(() => import("../pages/Truck/TruckloadCreate"));
 const TruckLoadPrint = lazy(() => import("../pages/Truck/TruckLoadPrint"));
 const TruckloadScan = lazy(() => import("../pages/Truck/TruckloadScan"));
-const WarehouseScan = lazy(() => import("../pages/Warehouse/WarehouseScan"));
 
 export default function AppRoutes() {
   return (
@@ -66,7 +67,7 @@ export default function AppRoutes() {
           <Route path="/change-password" element={<ChangePassword />} />
           <Route path="/contractor-create" element={<ContractorCreate />} />
           <Route path="/create" element={<CreateReceivePage />} />
-          <Route path="/dc-receive" element={<DcReceive />} />
+          <Route path="/dc-receive" element={<ReceiveTab />} />
           <Route path="/delivery-close" element={<DeliveryClose />} />
           <Route path="/delivery-close-media" element={<DeliveryCloseMediaEdit />} />
           <Route path="/delivery-issue-chat" element={<IssueInbox />} />
@@ -107,11 +108,13 @@ export default function AppRoutes() {
           <Route path="/delivery-truck-create" element={<TruckDeliveryCreate />} />
           <Route path="/delivery-truck-print/:truckLoadId" element={<TruckDeliveryPrint />} />
           <Route path="/delivery-truck-scan/:truckLoadId" element={<TruckDeliveryScan />} />
+          <Route path="/pickup-trucks" element={<TruckPickup />} />
+          <Route path="/pickup-trucks/:truckId" element={<TruckPickupScan />} />
           <Route path="/truck-create" element={<TruckLoadCreate />} />
           <Route path="/truck-print/:truckLoadId" element={<TruckLoadPrint />} />
           <Route path="/truck-scan" element={<TruckloadScan />} />
           <Route path="/truck-scan/:truckLoadId" element={<TruckloadScan />} />
-          <Route path="/wh-receive" element={<WarehouseScan />} />
+          <Route path="/wh-receive" element={<ReceiveTab />} />
         </Route>
         <Route path="/signin" element={<SignIn />} />
         <Route path="*" element={<NotFound />} />
